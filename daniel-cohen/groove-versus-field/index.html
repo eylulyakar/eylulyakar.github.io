@@ -1,0 +1,1538 @@
+<title>Live Groove Versus Field</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#f3f4f1; --surface:#ffffff; --ink:#14181a; --ink-soft:#33383a; --muted:#5b6560;
+    --line:#d8dbd5; --line-soft:#e6e8e3;
+    --field:#2455a4; --field-soft:#e7edf7;
+    --groove:#8a6329; --groove-soft:#f2ece1;
+    --rationale:#2f7d6b; --rationale-soft:#e7f3ef;
+    --scope-bg:#081210; --scope-grid:#132420; --scope-cell:#8fd7c9; --scope-cell-edge:#e7fbf5;
+    --scope-damage:#e08a5c; --scope-field:#6ab3ff; --scope-groove:#f0c14b; --shadow:0 1px 2px rgba(20,24,26,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#14171a; --surface:#1b1f22; --ink:#eceeec; --ink-soft:#c9cdc9; --muted:#8d9691;
+      --line:#31373a; --line-soft:#272c2f;
+      --field:#7ba3e0; --field-soft:#1e2a3c;
+      --groove:#d3a869; --groove-soft:#2e2718;
+      --rationale:#7fd9c4; --rationale-soft:#16302a;
+      --shadow:0 1px 3px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#14171a; --surface:#1b1f22; --ink:#eceeec; --ink-soft:#c9cdc9; --muted:#8d9691;
+    --line:#31373a; --line-soft:#272c2f;
+    --field:#7ba3e0; --field-soft:#1e2a3c;
+    --groove:#d3a869; --groove-soft:#2e2718;
+    --rationale:#7fd9c4; --rationale-soft:#16302a;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+  }
+
+  *{box-sizing:border-box;}
+  body{ background:var(--paper); color:var(--ink-soft); font-family:'IBM Plex Sans',system-ui,sans-serif; font-size:15.5px; line-height:1.55; }
+  .page{ max-width:1180px; margin:0 auto; padding:36px 22px 64px; }
+
+  h1,h2{ font-family:'Source Serif 4',Georgia,serif; color:var(--ink); font-weight:600; text-wrap:balance; margin:0; }
+  .eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.09em; text-transform:uppercase; color:var(--field); margin:0 0 10px; }
+
+  header.top{ display:flex; justify-content:space-between; align-items:flex-end; gap:20px; flex-wrap:wrap; margin-bottom:22px; }
+  h1{ font-size:1.85rem; line-height:1.15; }
+  .status-chip{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.05em; text-transform:uppercase; color:var(--muted);
+    border:1px solid var(--line); border-radius:20px; padding:6px 14px; display:inline-flex; align-items:center; gap:7px; white-space:nowrap; }
+  .status-chip i{ width:6px; height:6px; border-radius:50%; background:#5aa36b; display:inline-block; }
+
+  .lede{ color:var(--muted); max-width:62ch; margin:0 0 24px; font-size:.96rem; }
+
+  .scope-note{ background:var(--groove-soft); border:1px solid var(--line); border-left:3px solid var(--groove);
+    border-radius:8px; padding:14px 18px; font-size:.85rem; line-height:1.55; color:var(--ink-soft); margin:0 0 22px; max-width:none; }
+  .scope-note strong{ color:var(--ink); }
+
+  .console{ display:grid; grid-template-columns:minmax(0,1.4fr) 320px; gap:0; border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow); border-radius:8px; overflow:hidden; }
+  @media (max-width:920px){ .console{ grid-template-columns:1fr; } }
+
+  .stage{ display:flex; flex-direction:column; min-width:0; }
+  .stage-bar{ display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .stage-bar h2{ font-size:1.02rem; }
+  .stage-bar .sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); }
+  .sim-actions{ display:flex; gap:6px; }
+  .btn{ font-family:'IBM Plex Sans',sans-serif; font-size:.82rem; font-weight:500; color:var(--ink-soft);
+    background:var(--paper); border:1px solid var(--line); border-radius:6px; padding:7px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .btn:hover{ border-color:var(--field); color:var(--ink); }
+  .btn.primary{ background:var(--field); color:#fff; border-color:var(--field); }
+  .btn.small{ padding:5px 10px; font-size:.76rem; }
+
+  .canvas-wrap{ position:relative; background:var(--scope-bg); aspect-ratio:1/1; width:100%; }
+  canvas{ display:block; width:100%; height:100%; }
+  .canvas-legend{ position:absolute; left:12px; bottom:12px; display:flex; flex-direction:column; gap:5px;
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:#c9d6d1; }
+  .canvas-legend span{ display:flex; align-items:center; gap:7px; }
+  .canvas-legend i{ width:10px; height:10px; border-radius:2px; display:inline-block; }
+  .canvas-legend .t-readout{ position:absolute; right:12px; top:12px; left:auto; bottom:auto; color:#8fa79f; }
+
+  .metric-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(118px,1fr)); border-top:1px solid var(--line); }
+  .metric{ padding:12px 14px; border-right:1px solid var(--line); display:flex; flex-direction:column; min-width:0; }
+  .metric:last-child{ border-right:none; }
+  .metric span{ display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:4px; }
+  .metric strong{ margin-top:auto; font-family:'IBM Plex Mono',monospace; font-size:1.15rem; color:var(--ink); font-variant-numeric:tabular-nums; }
+
+  .controls{ padding:16px 18px; display:flex; flex-direction:column; gap:18px; border-left:1px solid var(--line); background:var(--surface); }
+  .controls h3{ font-family:'IBM Plex Sans',sans-serif; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin:0 0 10px; font-weight:600; }
+
+  .preset-row{ display:grid; grid-template-columns:repeat(5,1fr); gap:5px; }
+  .preset-row button{ font-family:'IBM Plex Mono',monospace; font-size:.72rem; padding:7px 2px; border-radius:5px; border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); cursor:pointer; }
+  .preset-row button:hover{ border-color:var(--field); color:var(--ink); }
+  .preset-row button.active{ background:var(--field); border-color:var(--field); color:#fff; }
+  .condition-caption{ margin:9px 0 0; font-size:.82rem; line-height:1.4; color:var(--ink-soft); }
+  .condition-caption b{ color:var(--ink); }
+
+  .seg-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:5px; }
+  .seg-row.seg-row-4{ grid-template-columns:repeat(2,1fr); }
+  .seg-row button{ font-family:'IBM Plex Sans',sans-serif; font-size:.78rem; padding:8px 4px; border-radius:5px; border:1px solid var(--line); background:var(--paper); color:var(--ink-soft); cursor:pointer; line-height:1.25; }
+  .seg-row button.active{ background:var(--ink); border-color:var(--ink); color:var(--surface); font-weight:600; }
+  .seg-row button.active.groove{ background:var(--groove-soft); border-color:var(--groove); color:var(--groove); font-weight:600; }
+  .seg-row button.active.field{ background:var(--field-soft); border-color:var(--field); color:var(--field); font-weight:600; }
+
+  .control-label{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px; }
+  .control-label label{ font-size:.84rem; color:var(--ink-soft); }
+  .control-label output{ font-family:'IBM Plex Mono',monospace; font-size:.78rem; color:var(--muted); }
+  .control-note{ font-size:.72rem; line-height:1.45; color:var(--muted); margin:6px 0 0; }
+  input[type=range]{ width:100%; accent-color:var(--field); }
+  /* A native slider's thumb centre never reaches the element's true edges -- it's
+     inset by half the thumb's own width at both ends, so value 0 sits ~8px in
+     from the left, not at 0%. Fixing the thumb to a known size here lets the
+     tick labels below compensate for that inset with calc() instead of guessing. */
+  input[type=range]::-webkit-slider-thumb{ width:16px; height:16px; }
+  input[type=range]::-moz-range-thumb{ width:16px; height:16px; }
+  /* Tick labels are placed at their TRUE position on the slider's linear scale
+     (not evenly spaced text) -- these mark specific reference values (the depth
+     conditions used in Stage 1/2/2b; round field amplitudes), which are not
+     evenly spaced themselves, so even spacing would put a label like "1" well
+     away from where the slider thumb actually sits at that value. */
+  .depth-ticks{ position:relative; height:13px; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--muted); margin-top:3px; }
+  .depth-ticks span{ position:absolute; top:0; transform:translateX(-50%); white-space:nowrap; }
+
+  .switch-line{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .switch-line label{ font-size:.84rem; color:var(--ink-soft); }
+  .switch{ position:relative; width:36px; height:20px; flex:none; }
+  .switch input{ opacity:0; width:0; height:0; }
+  .switch .track{ position:absolute; inset:0; background:var(--line); border-radius:20px; transition:.15s; cursor:pointer; }
+  .switch .track:before{ content:""; position:absolute; width:14px; height:14px; left:3px; top:3px; background:#fff; border-radius:50%; transition:.15s; }
+  .switch input:checked + .track{ background:var(--field); }
+  .switch input:checked + .track:before{ transform:translateX(16px); }
+
+  .field-block[data-off="true"] { opacity:.45; pointer-events:none; }
+
+  /* The model interpretation is presented as three pages in one place. The
+     live console above is deliberately untouched; only the long-form reading
+     layer is switched here. */
+  .model-notes{ margin-top:32px; max-width:none; }
+  .notes-overline{ margin-bottom:7px; color:var(--rationale); }
+  .notes-display-title{ max-width:820px; font-size:clamp(1.95rem,4vw,3.15rem); line-height:1.06; letter-spacing:-.02em; }
+  .model-notes > .lede-line{ max-width:76ch; font-size:.94rem; color:var(--muted); margin:10px 0 20px; }
+
+  .notes-tablist{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; border-bottom:1px solid var(--line); overflow:visible; }
+  .notes-tab{ appearance:none; position:relative; min-width:0; padding:0 0 11px; border:0; border-bottom:2px solid transparent; margin-bottom:-1px; background:transparent; color:var(--muted); font-family:'IBM Plex Sans',sans-serif; font-size:.98rem; text-align:left; cursor:pointer; transition:color .18s ease,border-color .18s ease; }
+  .notes-tab:hover{ color:var(--ink); }
+  .notes-tab[aria-selected="true"]{ color:var(--ink); border-bottom-color:var(--ink); }
+  .notes-tab:focus-visible{ outline:2px solid var(--field); outline-offset:4px; }
+  .notes-tab-index{ margin-right:7px; font-family:'IBM Plex Mono',monospace; font-size:.68rem; letter-spacing:.05em; color:var(--field); vertical-align:.12em; }
+
+  .notes-panels{ margin-top:18px; }
+  .notes-part{ margin:0; padding:clamp(22px,3vw,32px); border:1px solid var(--line); background:var(--surface); box-shadow:var(--shadow); }
+  .notes-part[hidden]{ display:none; }
+  .notes-part-layout{ display:block; }
+  .notes-part-lead{ display:grid; grid-template-columns:210px minmax(0,1fr); gap:24px; align-items:start; padding-bottom:16px; border-bottom:1px solid var(--line); }
+  .notes-part-content{ min-width:0; }
+  .notes-part.part-grounding{ --part-accent:var(--field); }
+  .notes-part.part-rationale{ --part-accent:var(--rationale); }
+  .notes-part.part-caveats{ --part-accent:var(--groove); }
+  .notes-kicker{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--part-accent); margin:5px 0 0; font-weight:600; }
+  .notes-heading{ font-family:'Source Serif 4',Georgia,serif; font-size:clamp(1.5rem,2.5vw,1.9rem); line-height:1.14; color:var(--ink); margin:0; font-weight:500; text-wrap:balance; }
+
+  /* Label-left / body-right rows -- the citation entries and the rationale
+     items share this one pattern instead of two different list styles. */
+  .pillars{ display:flex; flex-direction:column; }
+  .pillar{ display:grid; grid-template-columns:210px minmax(0,1fr); gap:4px 24px; padding:12px 0; border-bottom:1px solid var(--line-soft); }
+  .pillar:first-child{ padding-top:14px; }
+  .pillar:last-child{ border-bottom:none; padding-bottom:0; }
+  @media (max-width:840px){
+    .notes-part-lead{ grid-template-columns:1fr; gap:6px; }
+    .notes-kicker{ margin:0; }
+    .notes-heading{ max-width:28ch; }
+  }
+  @media (max-width:640px){
+    .model-notes{ margin-top:28px; }
+    .notes-display-title{ font-size:2rem; }
+    .notes-tablist{ grid-template-columns:1fr; gap:0; border-bottom:0; }
+    .notes-tab{ padding:9px 0; border-bottom:1px solid var(--line); }
+    .notes-tab[aria-selected="true"]{ border-bottom-width:2px; }
+    .notes-part{ padding:20px 18px; }
+    .pillar{ grid-template-columns:1fr; gap:4px; }
+  }
+  .pillar-label{ font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink); font-size:.86rem; line-height:1.4; }
+  .pillar-body{ margin:0; color:var(--muted); font-size:.85rem; line-height:1.48; }
+  .pillar-body em{ font-style:italic; }
+  .pillar-body strong{ font-weight:600; color:var(--ink); }
+  .pillar-cite{ display:block; margin-top:5px; font-family:'IBM Plex Mono',monospace; font-size:.72rem; color:var(--muted); opacity:.85; }
+  .pillar-cite a{ color:inherit; }
+  .part-caveats .pillar{ color:var(--muted); font-size:.85rem; line-height:1.48; }
+  .part-caveats .pillar strong{ color:var(--ink); font-weight:600; }
+
+  .part-footnote{ margin:12px 0 0; padding-top:12px; border-top:1px solid var(--line-soft); font-size:.82rem; color:var(--muted); max-width:78ch; }
+  .part-footnote strong{ font-weight:600; color:var(--ink); }
+
+  .model-scope-statement{ display:grid; grid-template-columns:210px minmax(0,1fr); gap:24px; align-items:start; margin:18px 0 4px; padding:18px 0 20px; border-top:2px solid var(--ink); border-bottom:1px solid var(--line); }
+  .model-scope-label{ font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.09em; text-transform:uppercase; color:var(--rationale); padding-top:4px; }
+  .model-scope-statement p{ max-width:76ch; margin:0; font-family:'Source Serif 4',Georgia,serif; font-size:clamp(1.08rem,2vw,1.28rem); line-height:1.45; color:var(--ink); text-wrap:pretty; }
+  @media (max-width:640px){
+    .model-scope-statement{ grid-template-columns:1fr; gap:7px; padding:15px 0 17px; }
+    .model-scope-label{ padding-top:0; }
+  }
+
+  .batch-panel{ margin-top:22px; border:1px solid var(--line); background:var(--surface); border-radius:8px; padding:18px 22px; box-shadow:var(--shadow); }
+  .batch-panel h3{ font-family:'IBM Plex Sans',sans-serif; font-size:1.02rem; color:var(--ink); margin:0 0 4px; font-weight:600; }
+  .batch-sub{ font-size:.84rem; color:var(--muted); margin:0 0 14px; max-width:70ch; }
+  .batch-table-wrap{ overflow-x:auto; }
+  table.batch-table{ width:100%; border-collapse:collapse; font-size:.82rem; min-width:560px; }
+  table.batch-table th, table.batch-table td{ padding:7px 12px; text-align:right; border-bottom:1px solid var(--line-soft); font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  table.batch-table th{ color:var(--muted); font-weight:500; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; }
+  table.batch-table th:first-child, table.batch-table td:first-child{ text-align:left; font-family:'IBM Plex Sans',sans-serif; font-weight:600; color:var(--ink); }
+  table.batch-table td.best{ color:var(--rationale); font-weight:600; }
+  .batch-note{ font-size:.78rem; color:var(--muted); margin-top:12px; line-height:1.5; }
+  .batch-placeholder{ font-size:.84rem; color:var(--muted); font-style:italic; padding:10px 0; }
+</style>
+
+<div class="page">
+  <header class="top">
+    <div>
+      <p class="eyebrow">Live model · simplified hypothesis model, ported from gbr_topo.py</p>
+      <h1>Groove Versus Field, Live</h1>
+    </div>
+    <span class="status-chip"><i></i> Running in your browser · exploratory, not calibrated</span>
+  </header>
+  <p class="lede">A simplified agent-based model — adhesion, repulsion, neighbour alignment, free-edge migration, sensitivity adaptation — mechanistically inspired by selected prior studies and one preprint, ported to run live. Change a cue below and watch the tissue reorganize in real time.</p>
+
+  <div class="scope-note">
+    <strong>What this is, and isn't.</strong> This page is not a finalized PhD membrane design — it explores one relatively stable question underneath it: how physical or topographical cues on a biomaterial surface might guide gingival cell organization, collective migration, and soft-tissue closure. Early GBR membrane exposure is one possible clinical motivation, but the polymer or biomaterial composition, layer architecture, groove geometry and dimensions, fabrication technique, cell model, and any antibacterial or osteogenic components are all still open. The bioelectric field explored here is primarily a comparison tool inspired by the Cohen Lab's electrotaxis work, not a component already committed to a final design. Treat everything below as a hypothesis-generating exploration of one sub-problem, not a prediction of which final membrane will work.
+  </div>
+
+  <div class="console">
+    <div class="stage">
+      <div class="stage-bar">
+        <div>
+          <h2>Collective closure, in real time</h2>
+          <span class="sub" id="stepReadout">t = 0 steps · N = 0 cells</span>
+        </div>
+        <div class="sim-actions">
+          <button class="btn" id="playBtn">Pause</button>
+          <button class="btn" id="resetBtn">Reset (same seed)</button>
+          <button class="btn small" id="newSeedBtn">New seed</button>
+        </div>
+      </div>
+      <div class="canvas-wrap">
+        <canvas id="scope"></canvas>
+        <div class="canvas-legend">
+          <span><i style="background:var(--scope-cell)"></i>Cell agents (colour = health)</span>
+          <span><i style="background:var(--scope-groove)"></i>Groove axis</span>
+          <span><i style="background:var(--scope-field)"></i>Field direction (biases electrotactic migration inward)</span>
+          <span><i style="background:transparent;border:1px dashed rgba(255,255,255,.75)"></i>Wound region (only this fixed circle is measured)</span>
+          <span><i style="background:transparent;border:1px dotted rgba(255,255,255,.5)"></i>Reference annulus (distant, same global cues — not cue-free)</span>
+        </div>
+      </div>
+      <div class="metric-row">
+        <div class="metric"><span>Open wound area (occupancy proxy)</span><strong id="mArea">100%</strong></div>
+        <div class="metric"><span>Distant reference gap (same cues)</span><strong id="mRef">0%</strong></div>
+        <div class="metric"><span>Radial order (global)</span><strong id="mOrder">+0.00</strong></div>
+        <div class="metric"><span>Radial order (fixed peri-wound annulus)</span><strong id="mOrderFront">+0.00</strong></div>
+        <div class="metric"><span>Groove alignment (fixed peri-wound annulus)</span><strong id="mGroove">+0.00</strong></div>
+        <div class="metric"><span>Stress burden (time-avg.)</span><strong id="mDamage">0.0%</strong></div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div>
+        <h3>Comparison scenarios</h3>
+        <div class="preset-row" id="presets">
+          <button data-p="C1">C1</button>
+          <button data-p="C2">C2</button>
+          <button data-p="C3">C3</button>
+          <button data-p="C4">C4</button>
+          <button data-p="C5">C5</button>
+        </div>
+        <p class="condition-caption" id="conditionCaption"></p>
+      </div>
+
+      <div>
+        <h3>Groove topography</h3>
+        <div class="seg-row seg-row-4" id="grooveMode">
+          <button data-g="none">Flat</button>
+          <button data-g="radial" class="groove">Radial (idealized)</button>
+          <button data-g="tangential" class="groove">Tangential (idealized)</button>
+          <button data-g="parallel" class="groove">Parallel (manufacturable)</button>
+        </div>
+        <div class="field-block" id="grooveDepthBlock" style="margin-top:12px;">
+          <div class="control-label"><label>Illustrative groove depth (µm; not calibrated)</label><output id="depthOut">5.0 µm</output></div>
+          <input type="range" id="depth" min="0" max="5" step="0.1" value="5">
+          <div class="depth-ticks"><span style="left:calc(8px + (100% - 16px) * 0)">0</span><span style="left:calc(8px + (100% - 16px) * 0.06)">0.3</span><span style="left:calc(8px + (100% - 16px) * 0.16)">0.8</span><span style="left:calc(8px + (100% - 16px) * 0.4)">2</span><span style="left:calc(8px + (100% - 16px) * 1)">5 µm</span></div>
+          <p class="control-note">Depth is used here as a <strong>phenomenological proxy</strong> for groove-guidance strength. Groove width is not modeled, and the monotonic depth–torque relationship is not fitted to Doll et al. or to a specific GBR membrane material.</p>
+        </div>
+      </div>
+
+      <div>
+        <h3>Bioelectric field</h3>
+        <div class="switch-line">
+          <label for="fieldOn">Field on (convergent)</label>
+          <label class="switch"><input type="checkbox" id="fieldOn"><span class="track"></span></label>
+        </div>
+        <div class="field-block" id="fieldBlock" style="margin-top:12px;">
+          <div class="control-label"><label>Field amplitude</label><output id="ampOut">1.0</output></div>
+          <input type="range" id="amp" min="0" max="8" step="0.1" value="1">
+          <div class="depth-ticks"><span style="left:calc(8px + (100% - 16px) * 0)">0</span><span style="left:calc(8px + (100% - 16px) * 0.0625)">0.5</span><span style="left:calc(8px + (100% - 16px) * 0.125)">1</span><span style="left:calc(8px + (100% - 16px) * 0.25)">2</span><span style="left:calc(8px + (100% - 16px) * 0.5)">4</span><span style="left:calc(8px + (100% - 16px) * 1)">8</span></div>
+          <div class="switch-line" style="margin-top:14px;">
+            <label for="pulsedOn">Pulsed (20 steps on / 20 off)</label>
+            <label class="switch"><input type="checkbox" id="pulsedOn"><span class="track"></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3>Cell division</h3>
+        <div class="switch-line">
+          <label for="divOn">Density-dependent division</label>
+          <label class="switch"><input type="checkbox" id="divOn"><span class="track"></span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="model-notes">
+    <p class="eyebrow notes-overline">Model interpretation</p>
+    <h2 class="notes-display-title">What supports the model — and what remains open.</h2>
+    <p class="lede-line">This isn't a black box, but it also isn't a validated replica: each component below is motivated by a specific prior study or preprint, this page approximates it with a much simpler discrete-agent model, and every place the model stays qualitative is named, not hidden.</p>
+
+    <div class="notes-tablist" role="tablist" aria-label="Model interpretation sections">
+      <button class="notes-tab" id="tab-rationale" type="button" role="tab" aria-selected="true" aria-controls="panel-rationale" tabindex="0"><span class="notes-tab-index">01</span>Why this design</button>
+      <button class="notes-tab" id="tab-grounding" type="button" role="tab" aria-selected="false" aria-controls="panel-grounding" tabindex="-1"><span class="notes-tab-index">02</span>Evidence base</button>
+      <button class="notes-tab" id="tab-caveats" type="button" role="tab" aria-selected="false" aria-controls="panel-caveats" tabindex="-1"><span class="notes-tab-index">03</span>Limits &amp; reading</button>
+    </div>
+
+    <div class="notes-panels">
+    <section class="notes-part part-grounding" id="panel-grounding" role="tabpanel" aria-labelledby="tab-grounding" tabindex="0" hidden>
+      <div class="notes-part-layout">
+        <div class="notes-part-lead">
+          <p class="notes-kicker">02 · Evidence base</p>
+          <h2 class="notes-heading">Candidate model components, motivated by prior studies and one preprint</h2>
+        </div>
+        <div class="notes-part-content">
+          <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-label">Collective, correlated motion</div>
+          <p class="pillar-body">Found that <strong>epithelial cells don't move as independent particles</strong>, but the specific pattern is <strong>history-dependent, not just size-dependent</strong>: tissues that expanded from a smaller starting size develop tissue-spanning vortices in their interior from feedback between a cell's own heading and its neighbours' motion, while tissues that started at (or reached) the same size without that expansion history instead show different density profiles and arrested proliferation. So "cells move collectively" is the qualitative takeaway, not a claim that a tissue of any given size shows this vortex behaviour — it depends on how the tissue got there, which this page's fixed initial disc doesn't model at all. Their model is also a continuum active-polar-fluid description; this page instead uses discrete self-propelled agents with pairwise forces, so <strong>the citation supports the biological motivation, not a shared implementation</strong> — each agent here pushes/pulls on its neighbours and blends its direction with theirs, which is the qualitative behaviour, not the same mathematics.<span class="pillar-cite">Heinrich et al. 2020 — <em>eLife</em> (Cohen lab)</span></p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Field-directed collective steering</div>
+          <p class="pillar-body">Showed that an applied electric field doesn't just redirect isolated cells — it can <strong>steer the collective migration of a whole coupled epithelial sheet</strong>, turning a moving group the way you'd steer a single cell. That's the empirical basis for testing a field as a guidance cue here at all: an external cue really can redirect an already-moving, mechanically-coupled tissue, not just individual stragglers.<span class="pillar-cite">Cohen, Nelson &amp; Maharbiz 2014 — <em>Nat. Mater.</em></span></p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">"Cellular cruise control"</div>
+          <p class="pillar-body">Showed <strong>a tissue actively damps its own sensitivity</strong> to a steady external command the longer that command stays constant, the way cruise control settles onto one speed and stops "pushing." <em>β</em>-adaptation on the field torque is this page's model of that damping. The Pulsed toggle <strong>explores whether periodic off-phases let sensitivity recover</strong> under the model's own assumed adaptation/recovery dynamics — it is not an independent empirical test of cruise control. The specific adaptation rate and the 20-steps-on/20-off duty cycle used here are <strong>modeling choices inspired by that finding, not values taken from the paper</strong> — so a pulsed condition outperforming a continuous one on this page demonstrates the model's own built-in assumption, not a replication of the Breinyn result.<span class="pillar-cite">Breinyn et al. 2024 — bioRxiv preprint, not yet peer-reviewed as of this writing</span></p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Contact guidance on microgrooved surfaces (this page's core thesis axis)</div>
+          <p class="pillar-body">Studied <strong>human gingival fibroblasts on microgrooved Ti6Al4V ELI surfaces</strong> fabricated by UV lithography and wet etching. The strongest early alignment and spreading were observed for <strong>nominal mask widths of 7.5 and 10 µm</strong>, which produced <strong>measured groove widths of approximately 11.5 and 13.9 µm and depths of 1.6 and 2.4 µm</strong>; a broader favorable range of 7.5–20 µm nominal width and 1.6–3.2 µm depth was also discussed, with alignment decreasing for larger structures. These effects were most evident after 8 hours, and most of the statistical differences diminished (not disappeared — oriented cells were still visible on structured surfaces) after 72 hours, once cells had filled the surface. This is direct, gingival-cell-specific evidence that contact guidance from microgrooves is real and worth modeling — it does <strong>not quantitatively calibrate this model's groove dimensions or guidance strength</strong> for an as-yet-undetermined GBR membrane material (see the depth control's own note), and is the closest empirical anchor here to the actual PhD thesis axis (biomaterial topography), which the electrotaxis literature above doesn't cover on its own.<span class="pillar-cite">Doll, Husari, Ahrens, Spindler, Guber &amp; Steinberg 2021, <em>"Enhancing the soft-tissue integration of dental implant abutments — in vitro study to reveal an optimized microgroove surface design to maximize spreading and alignment of human gingival fibroblasts,"</em> <em>J. Biomed. Mater. Res. B</em> 109(11), 1768–1776 · DOI <a href="https://doi.org/10.1002/jbm.b.34836" target="_blank" rel="noopener">10.1002/jbm.b.34836</a></span></p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Stress burden</div>
+          <p class="pillar-body">Showed that <strong>over-driving a strongly adherent epithelial sheet damages it</strong>, not just speeds it up — pulling on it faster than its cell–cell junctions can accommodate. So sustained, high-force herding here carries a real stress cost (the Stress burden metric — the <strong>time-averaged fraction</strong> of agents over an arbitrary tension threshold at each step, not a measured biological damage readout), not just a speed benefit. The specific threshold value is <strong>this model's own parameter choice</strong>, not one derived from the paper — Shim et al. supports the general "over-driving costs something" idea, not this exact number.<span class="pillar-cite">Shim, Devenport &amp; Cohen 2021 — <em>PNAS</em></span></p>
+        </div>
+          </div>
+          <p class="part-footnote">The one thing added on top of that base model: <strong>a groove-guidance torque</strong>, standing in for contact guidance from the membrane's microgrooves (see the Doll et al. entry above for direct gingival-fibroblast evidence of that effect).</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="notes-part part-rationale" id="panel-rationale" role="tabpanel" aria-labelledby="tab-rationale" tabindex="0">
+      <div class="notes-part-layout">
+        <div class="notes-part-lead">
+          <p class="notes-kicker">01 · Design logic</p>
+          <h2 class="notes-heading">Why the experiment is built this way</h2>
+        </div>
+        <div class="notes-part-content">
+          <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-label">Why circular</div>
+          <p class="pillar-body">A round exposure has <strong>no privileged direction</strong> — every point on the rim sees the same geometry, so any <em>directional</em> closure bias — favoring one side over another — has to come from the cue being tested (groove or field), not from a straight edge or a corner nudging cells one way for free. It does not mean the model has zero closure bias with no cue active: the free-edge polarization already gives every condition, cue or no cue, some baseline inward pull from open space alone (see the caveats below). What circularity controls for is <strong>asymmetry</strong>, not the presence of closure itself. It also gives "aligned," "perpendicular," and "inward" one clean, unambiguous meaning at every point on the boundary.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Why the field is radial</div>
+          <p class="pillar-body">The field always points from a cell's current spot <strong>straight at the wound centre</strong> — a convergent field, not a fixed lab-frame direction. That's an idealised, fully-circular extension of a real precedent, not a literal replay of it: Zajdel, Shim &amp; Cohen (2021, <em>Biosens. Bioelectron.</em>, "Come together") closed a linear 1.5mm gap between two keratinocyte sheets with a field converging on that gap. It is a <strong>different mechanism</strong> from the Cohen Lab's SCHEEPDOG platform (Zajdel et al. 2020, <em>Cell Syst.</em>), which steers tissue with one spatially-uniform field direction, switched over time across four electrodes — not a field that re-aims itself per cell, per position, all the way around a circle.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Why aligned vs. perpendicular grooves</div>
+          <p class="pillar-body">A groove is a nematic cue: it <strong>locks a cell's long axis onto a line but doesn't pick which way along it to crawl</strong> — unlike the field, which is polar and does pick a direction. "Radial" and "tangential" are both <strong>idealized, wound-centred patterns</strong> — useful for asking a clean mechanistic question, but not something you could cut into a membrane before knowing exactly where the exposure will be. A third, "parallel" option is included precisely because it's the <strong>manufacturable</strong> alternative: one fixed groove direction across the whole surface, regardless of where a wound later opens.</p>
+        </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="notes-part part-caveats" id="panel-caveats" role="tabpanel" aria-labelledby="tab-caveats" tabindex="0" hidden>
+      <div class="notes-part-layout">
+        <div class="notes-part-lead">
+          <p class="notes-kicker">03 · Interpretation limits</p>
+          <h2 class="notes-heading">Read with these caveats</h2>
+        </div>
+        <div class="notes-part-content">
+          <div class="pillars">
+        <div class="pillar">
+          <div class="pillar-label">Confinement, an edge-torque fix, and pre-equilibration</div>
+          <p class="pillar-body">A confining force at the tissue's edge makes this a <strong>genuine closure assay, not an unconfined spread</strong>. Free-edge polarisation now fires only where open space faces the tissue interior (the wound), so the outer rim no longer fights the wall as a false second wound edge. The tissue is also seeded as a <strong>full, wound-free disc, given a brief cue-free pre-equilibration (30 steps, field/groove/division off, self-propulsion and noise still on) to settle the seeding jitter, and only then cut open</strong> at the wound — so the timed run doesn't start by conflating "the wound closing" with "the freshly-seeded lattice settling."</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Proliferation is off</div>
+          <p class="pillar-body">Turning it on reproduces the <strong>uncontrolled growth</strong> seen earlier (~1,000 → 12,000+ cells in 800 steps), capped here at 3,000 for performance.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Speed isn't calibrated</div>
+          <p class="pillar-body">The playback pace was chosen to be <strong>watchable, not to match any measured migration rate</strong> — real epithelial fronts move far slower.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Dimensionless units, no material fixed</div>
+          <p class="pillar-body">A qualitative, mechanistic model — <strong>not fitted</strong> to gingival keratinocytes, MDCK cells, or any specific candidate biomaterial surface. PCL–HTCC, PCL/PLGA and similar are candidate examples under consideration, not a confirmed thesis material.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Occupancy proxy, not real space</div>
+          <p class="pillar-body">"Open wound area" and "distant reference gap" both work by sampling whether a grid point falls inside any cell's drawn footprint — an <strong>oriented ellipse</strong>, matching how a cell is actually rendered, not a circle, so a cell pointing across a gap covers less of it than one pointing along its length. Because footprints are agent-sized, not a continuous field, even a mechanically settled, fully confluent monolayer reads as partly "open" — this is a <strong>sampling artifact of the occupancy test, not real physical space</strong> between cells. <strong>Closure values are sensitive to the assumed agent footprint size</strong> (currently 0.62 × 0.372 units, chosen to match the drawn cell) — no footprint-sensitivity analysis has been run, so treat exact closure percentages as this-model's-scale numbers, not calibrated measurements.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Reference ring is same-condition, not cue-free</div>
+          <p class="pillar-body">The distant reference ring exists to make that sampling artifact visible: it is <strong>not cue-free or "undisturbed" tissue</strong> — it sits far from the wound but is still exposed to whatever groove or field cue is currently selected globally, so read it as "how open does normal, same-condition tissue look under this occupancy test," not as a zero baseline. The wound-closure percentage itself is calibrated separately: it's measured relative to the <strong>actual sampled open area right after the wound is cut</strong> (not a theoretical circle area), so closure still starts at 0% regardless of this baseline artifact.</p>
+        </div>
+        <div class="pillar">
+          <div class="pillar-label">Front-zone metrics, and closure that can go negative</div>
+          <p class="pillar-body">Radial order and groove alignment are reported for a <strong>fixed peri-wound annulus</strong> (within 3 units of the wound boundary on either side) rather than averaged over the whole tissue — this is a geometric ring at a constant radius, not a dynamically tracked advancing front, so treat it as "activity near the wound," not literal front-line tracking. Radial order runs +1 (inward) to −1 (outward); groove alignment is <strong>nematic</strong> (+1 parallel, −1 perpendicular to the groove axis) and says nothing by itself about whether closure succeeded. Open wound area and closure can now go past 100%/below 0% respectively if a wound genuinely widens (e.g. under strong tension-driven retraction), rather than being clamped to look like it never gets worse than the starting point.</p>
+        </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+
+    <aside class="model-scope-statement" aria-label="Model scope">
+      <span class="model-scope-label">Model scope</span>
+      <p>This is not a prediction of which final GBR membrane material will work. It's an interactive, hypothesis-generating model for asking how different physical guidance cues might influence collective gingival cell migration and closure — one open sub-question, not a finished design.</p>
+    </aside>
+  </div>
+
+  <div class="batch-panel" id="batchPanel">
+    <h3>Quantitative comparison (same seed)</h3>
+    <p class="batch-sub">Runs C1–C5 head-to-head from the identical, pre-equilibrated starting tissue (current seed shown above), division and pulsing off, for a fixed number of steps. This is <strong>one run, not averaged across multiple seeds</strong> — read it as a hypothesis-generating comparison, not a statistically powered result.</p>
+    <button class="btn small" id="runBatchBtn">Run all conditions</button>
+    <div id="batchOutput" class="batch-table-wrap" style="margin-top:14px;">
+      <p class="batch-placeholder">Click "Run all conditions" to compare C1–C5 quantitatively at the current seed.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---- physical parameters, matching cellherd/tissue.py TissueParams defaults ----
+  const P = {
+    r0:1.0, rAdh:2.2, rCut:2.2, adhCap:0.6,
+    kRep:25.0, kAdh:1.6, mobility:0.06,
+    v0:0.1, rhoCrowd:1.6, crowdExp:6.0,
+    Jalign:0.25, Jedge:0.26, rhoEdge:0.85, noise:0.09,
+    betaMax:0.55, Ethresh:0.28, kSpeed:0.75,
+    tauAdapt:60.0, tauRecover:300.0, Eref:1.0,
+    tensionCrit:12.0, kInjury:0.00025, tauRepair:400.0, healthFloor:0.15,
+    kWall:8.0, dt:1.0,
+    pDiv:0.01, rhoDiv:1.5, maxN:3000,
+  };
+  const R_TISSUE = 18.0, R_WOUND = 6.0;
+  const GROOVE_GAIN_MAX = 0.9, GROOVE_DEPTH_HALF = 1.0;
+  // Wound-front band is now SYMMETRIC around the wound boundary: a closing
+  // cell that has already crossed into r<R_WOUND is still the advancing
+  // front, not something that should drop out of the "front" reading.
+  const FRONT_BAND = 3.0;
+  // A reference ring far from the wound (well inside the confinement wall's
+  // influence too) instead of one immediately adjacent to it -- the adjacent
+  // ring depletes as cells migrate toward the wound, so it was never a clean
+  // "undisturbed tissue" baseline.
+  const DIST_REF_LO = 13.0, DIST_REF_HI = 15.0;
+  // Coverage-test ellipse matches how a cell is actually drawn (see draw()):
+  // semi-major axis along heading, semi-minor across it -- not a circle.
+  const CELL_RX = P.r0*0.62, CELL_RY = CELL_RX*0.6;
+  const EQUIL_STEPS = 30; // mechanical relaxation steps before the wound is cut
+
+  function mulberry32(seed){
+    let t = seed >>> 0;
+    return function(){
+      t = (t + 0x6D2B79F5) >>> 0;
+      let x = Math.imul(t ^ (t >>> 15), t | 1);
+      x = (x + Math.imul(x ^ (x >>> 7), x | 61)) >>> 0;
+      return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  function makeGaussian(rng){
+    let spare = null;
+    return function(){
+      if (spare !== null){ const v = spare; spare = null; return v; }
+      let u, v, s;
+      do { u = rng()*2-1; v = rng()*2-1; s = u*u+v*v; } while (s===0 || s>=1);
+      const mul = Math.sqrt(-2*Math.log(s)/s);
+      spare = v*mul;
+      return u*mul;
+    };
+  }
+
+  function insideWoundShape(x,y){ return x*x+y*y <= R_WOUND*R_WOUND; }
+
+  // Seeds a FULL disc -- no wound-shaped hole. The wound is cut afterwards,
+  // once the lattice has been allowed to mechanically relax (see resetSim):
+  // seeding directly around a hole mixed "the wound closing" with "the
+  // initial jitter settling" into the same first few dozen steps.
+  function seedCells(rng){
+    const a = P.r0;
+    const rows = Math.ceil(2*R_TISSUE/(a*Math.sqrt(3)/2))+2;
+    const cols = Math.ceil(2*R_TISSUE/a)+2;
+    const xs=[], ys=[];
+    for (let i=-Math.floor(rows/2); i<=Math.floor(rows/2); i++){
+      const y = i*a*Math.sqrt(3)/2;
+      const off = (((i%2)+2)%2)*a/2;
+      for (let j=-Math.floor(cols/2); j<=Math.floor(cols/2); j++){
+        const x = j*a+off;
+        if (Math.hypot(x,y) < R_TISSUE){ xs.push(x); ys.push(y); }
+      }
+    }
+    const n = xs.length;
+    const jx = new Float64Array(n), jy = new Float64Array(n), theta = new Float64Array(n);
+    for (let k=0;k<n;k++){
+      jx[k] = xs[k] + rng()*0.1*a - 0.05*a; // approx N(0,0.05a) via small uniform jitter
+      jy[k] = ys[k] + rng()*0.1*a - 0.05*a;
+      theta[k] = rng()*Math.PI*2;
+    }
+    return {x:jx, y:jy, theta:theta, n:n};
+  }
+
+  // ---- spatial grid for O(N) neighbour queries ----
+  function SpatialGrid(cellSize, half){
+    this.cs = cellSize; this.half = half;
+    this.dim = Math.ceil((2*half)/cellSize)+2;
+    this.buckets = new Array(this.dim*this.dim);
+  }
+  SpatialGrid.prototype.key = function(x,y){
+    const bx = Math.floor((x+this.half)/this.cs)+1;
+    const by = Math.floor((y+this.half)/this.cs)+1;
+    return Math.max(0,Math.min(this.dim-1,bx))*this.dim + Math.max(0,Math.min(this.dim-1,by));
+  };
+  SpatialGrid.prototype.build = function(x,y,n){
+    // Reuse the bucket arrays instead of creating hundreds of short-lived
+    // arrays on every model step. This removes a major source of GC pauses.
+    for (let i=0;i<this.buckets.length;i++) if (this.buckets[i]) this.buckets[i].length=0;
+    for (let i=0;i<n;i++){
+      const k = this.key(x[i],y[i]);
+      if (!this.buckets[k]) this.buckets[k]=[];
+      this.buckets[k].push(i);
+    }
+  };
+  SpatialGrid.prototype.forNeighbours = function(x,y,cb){
+    const bx = Math.floor((x+this.half)/this.cs)+1;
+    const by = Math.floor((y+this.half)/this.cs)+1;
+    for (let dx=-1;dx<=1;dx++) for (let dy=-1;dy<=1;dy++){
+      const gx = bx+dx, gy = by+dy;
+      if (gx<0||gx>=this.dim||gy<0||gy>=this.dim) continue;
+      const b = this.buckets[gx*this.dim+gy];
+      if (b) for (let k=0;k<b.length;k++) cb(b[k]);
+    }
+  };
+
+  // ---- simulation state ----
+  const state = {
+    running:true, seed:1234, t:0,
+    groove:"radial", depth:5.0, fieldOn:true, amp:1.0, divOn:false, pulsed:false,
+  };
+
+  let x,y,theta,health,beta,N;
+  let damageAccum=0;
+  let rng, gauss;
+  let grid = new SpatialGrid(P.rCut, R_TISSUE+4);
+  let area0 = 1;
+  let woundGridX=[], woundGridY=[];
+  // A reference ring FAR from the wound (13-15 units out, well clear of both
+  // the wound's pull and the confinement wall) -- not a ring right next to the
+  // wound, which depletes as cells migrate toward the closing gap and so was
+  // never a clean "undisturbed tissue" reading.
+  let distRefX=[], distRefY=[];
+
+  // Scratch arrays are allocated once and reused. The old implementation
+  // allocated more than a dozen N-sized arrays per step (twice per frame),
+  // which made garbage collection visible as periodic page stutter.
+  function makeStepWorkspace(){
+    const array = () => new Float64Array(P.maxN);
+    return {
+      F_x:array(), F_y:array(), rho:array(), free_x:array(), free_y:array(),
+      sumC:array(), sumS:array(), nSelf:array(), tension:array(),
+      newHealth:array(), newBeta:array(), dispX:array(), dispY:array(),
+      cosTheta:array(), sinTheta:array(),
+    };
+  }
+  const liveWork = makeStepWorkspace();
+  const batchWork = makeStepWorkspace();
+
+  function clearAccumulationBuffers(work,n){
+    work.F_x.fill(0,0,n); work.F_y.fill(0,0,n); work.rho.fill(0,0,n);
+    work.free_x.fill(0,0,n); work.free_y.fill(0,0,n); work.tension.fill(0,0,n);
+  }
+
+  function cacheAngles(angle,n,work){
+    for (let i=0;i<n;i++){
+      work.cosTheta[i]=Math.cos(angle[i]);
+      work.sinTheta[i]=Math.sin(angle[i]);
+    }
+  }
+
+  function buildWoundGrid(){
+    woundGridX=[]; woundGridY=[]; distRefX=[]; distRefY=[];
+    const g=0.4;
+    for (let gy=-R_TISSUE; gy<=R_TISSUE; gy+=g){
+      for (let gx=-R_TISSUE; gx<=R_TISSUE; gx+=g){
+        const r2 = gx*gx+gy*gy;
+        if (r2 <= R_WOUND*R_WOUND) { woundGridX.push(gx); woundGridY.push(gy); }
+        else if (r2 >= DIST_REF_LO*DIST_REF_LO && r2 <= DIST_REF_HI*DIST_REF_HI) { distRefX.push(gx); distRefY.push(gy); }
+      }
+    }
+  }
+  buildWoundGrid();
+
+  // Coverage test shared by live and batch measurements. Cell angles are
+  // cached once per measurement and neighbour scanning stops at the first
+  // covering cell; both changes preserve the same ellipse test and result.
+  function pointIsCovered(px,py,xArr,yArr,cosTheta,sinTheta){
+    const bx = Math.floor((px+grid.half)/grid.cs)+1;
+    const by = Math.floor((py+grid.half)/grid.cs)+1;
+    for (let dxBucket=-1;dxBucket<=1;dxBucket++) for (let dyBucket=-1;dyBucket<=1;dyBucket++){
+      const gx=bx+dxBucket, gy=by+dyBucket;
+      if (gx<0||gx>=grid.dim||gy<0||gy>=grid.dim) continue;
+      const bucket=grid.buckets[gx*grid.dim+gy];
+      if (!bucket) continue;
+      for (let k=0;k<bucket.length;k++){
+        const i=bucket[k];
+        const dx=px-xArr[i], dy=py-yArr[i];
+        const ct=cosTheta[i], st=sinTheta[i];
+        const dxL=dx*ct+dy*st, dyL=-dx*st+dy*ct;
+        if ((dxL*dxL)/(CELL_RX*CELL_RX) + (dyL*dyL)/(CELL_RY*CELL_RY) <= 1) return true;
+      }
+    }
+    return false;
+  }
+
+  // Shared by ongoing readings and the true t=0 baseline so area0 is
+  // calibrated with the identical sampled occupancy test.
+  function countUncovered(gridX,gridY,xArr,yArr,work){
+    let uncovered=0;
+    for (let k=0;k<gridX.length;k++){
+      if (!pointIsCovered(gridX[k],gridY[k],xArr,yArr,work.cosTheta,work.sinTheta)) uncovered++;
+    }
+    return uncovered;
+  }
+
+  function resetSim(){
+    // Same seed every reset/preset switch, on purpose: comparing C1 through C5
+    // (or before/after a control tweak) needs an identical starting tissue, or
+    // the comparison is confounded by different initial jitter. Use "New seed"
+    // to deliberately start a fresh, independent run.
+    rng = mulberry32(state.seed);
+    gauss = makeGaussian(rng);
+    const seeded = seedCells(rng); // full disc, no wound yet
+    x = Array.from(seeded.x); y = Array.from(seeded.y); theta = Array.from(seeded.theta);
+    N = seeded.n;
+    health = new Array(N).fill(1.0);
+    beta = new Array(N).fill(P.betaMax);
+    state.t = 0; damageAccum = 0;
+
+    // Mechanically equilibrate the INTACT monolayer before cutting the wound:
+    // freeze the field/groove/division cues (there is no wound yet for "edge"
+    // guidance to mean anything) and let plain repulsion+adhesion+neighbour
+    // alignment+the confinement wall settle the seeding lattice's initial
+    // jitter, so the real run doesn't start by conflating "the wound closing"
+    // with "the freshly-seeded lattice still settling."
+    const savedField=state.fieldOn, savedGroove=state.groove, savedDiv=state.divOn;
+    state.fieldOn=false; state.groove="none"; state.divOn=false;
+    for (let s=0; s<EQUIL_STEPS; s++) step();
+    state.fieldOn=savedField; state.groove=savedGroove; state.divOn=savedDiv;
+
+    // Cut the wound now that the lattice has relaxed.
+    const keep=[];
+    for (let i=0;i<N;i++) if (!insideWoundShape(x[i],y[i])) keep.push(i);
+    x = keep.map(i=>x[i]); y = keep.map(i=>y[i]); theta = keep.map(i=>theta[i]);
+    health = keep.map(i=>health[i]); beta = keep.map(i=>beta[i]);
+    N = keep.length;
+
+    state.t = 0; damageAccum = 0;
+    // area0 is the ACTUALLY-MEASURED open area right after cutting -- not the
+    // raw geometric wound-circle area -- so closure reads exactly 0% at t=0
+    // regardless of how the occupancy test itself samples cell footprints.
+    grid.build(x, y, N);
+    cacheAngles(theta,N,liveWork);
+    area0 = Math.max(countUncovered(woundGridX,woundGridY,x,y,liveWork) * 0.16, 0.16);
+  }
+
+  function grooveAngle(px,py){
+    if (state.groove === "parallel") return 0; // fixed lab-frame direction -- a straight, manufacturable line pattern, independent of where the wound ends up
+    const base = Math.atan2(py,px);
+    return state.groove === "tangential" ? base + Math.PI/2 : base;
+  }
+  function grooveGain(){
+    if (state.groove === "none" || state.depth<=0) return 0;
+    return GROOVE_GAIN_MAX * state.depth / (state.depth + GROOVE_DEPTH_HALF);
+  }
+
+  function step(){
+    grid.build(x,y,N);
+    const {F_x,F_y,rho,free_x,free_y,sumC,sumS,nSelf,tension,
+      newHealth,newBeta,dispX,dispY,cosTheta,sinTheta} = liveWork;
+    clearAccumulationBuffers(liveWork,N);
+    cacheAngles(theta,N,liveWork);
+    for (let i=0;i<N;i++){ sumC[i]=cosTheta[i]; sumS[i]=sinTheta[i]; nSelf[i]=1; }
+
+    for (let i=0;i<N;i++){
+      grid.forNeighbours(x[i],y[i], function(j){
+        if (j<=i) return;
+        const dx = x[j]-x[i], dy = y[j]-y[i];
+        const d = Math.max(Math.hypot(dx,dy), 1e-9);
+        if (d >= P.rCut) return;
+        const ux = dx/d, uy = dy/d;
+        let mag = 0;
+        if (d < P.r0) mag = -P.kRep*(P.r0-d);
+        else if (d < P.rAdh) mag = P.kAdh*Math.min(d-P.r0, P.adhCap);
+        const fx = mag*ux, fy = mag*uy;
+        F_x[i]+=fx; F_y[i]+=fy; F_x[j]-=fx; F_y[j]-=fy;
+        const w = Math.pow(1-d/P.rCut, 2);
+        rho[i]+=w; rho[j]+=w;
+        free_x[i]-=w*ux; free_y[i]-=w*uy; free_x[j]+=w*ux; free_y[j]+=w*uy;
+        sumC[i]+=cosTheta[j]; sumC[j]+=cosTheta[i];
+        sumS[i]+=sinTheta[j]; sumS[j]+=sinTheta[i];
+        nSelf[i]+=1; nSelf[j]+=1;
+        if (mag>0){ const ten=mag*d; tension[i]+=0.5*ten; tension[j]+=0.5*ten; }
+      });
+    }
+
+    let damagedCount=0;
+    const g = grooveGain();
+
+    for (let i=0;i<N;i++){
+      const excess = Math.max(tension[i]-P.tensionCrit, 0);
+      if (excess>0) damagedCount++;
+      const mc = sumC[i]/nSelf[i], ms = sumS[i]/nSelf[i];
+      const ct = cosTheta[i], st = sinTheta[i];
+      const alignTorque = P.Jalign*(ms*ct - mc*st);
+
+      const r = Math.max(Math.hypot(x[i],y[i]), 1e-9);
+      const outX = x[i]/r, outY = y[i]/r;
+      const fn = Math.hypot(free_x[i],free_y[i]);
+      let edgeTorque = 0;
+      if (rho[i] < P.rhoEdge && fn > 1e-9){
+        const fxN = free_x[i]/fn, fyN = free_y[i]/fn;
+        // Only a WOUND-facing free edge -- local open space pointing back toward
+        // the tissue interior, i.e. against the outward radial direction --
+        // should polarise a cell into the gap. A cell at the outer rim of the
+        // simulated patch is "low density" only because the simulation domain
+        // ends there, not because of a real tissue edge; its free-space vector
+        // points AWAY from the centre, so excluding it here stops that rim from
+        // fighting the confinement wall as a fake second wound edge.
+        const facesInward = (fxN*outX + fyN*outY) < 0;
+        if (facesInward){
+          edgeTorque = P.Jedge*(fyN*ct - fxN*st);
+        }
+      }
+
+      const inwardAngle = Math.atan2(-y[i], -x[i]);
+      const EmagBase = state.fieldOn ? state.amp : 0;
+      // Pulsed mode: a 20-step-on/20-step-off duty cycle instead of a
+      // constantly-held field -- this is what the "cellular cruise control"
+      // citation above is actually about (a held command loses bite as the
+      // tissue adapts; a pulsing one keeps re-arming it), so the toggle exists
+      // to let that claim be checked, not just asserted.
+      const Emag = state.pulsed ? (Math.floor(state.t/20)%2===0 ? EmagBase : 0) : EmagBase;
+      const Eeff = Math.max(Emag - P.Ethresh, 0);
+      let fieldTorque = 0;
+      if (Eeff > 1e-9){
+        fieldTorque = beta[i]*Math.min(Eeff,2.0)*Math.sin(inwardAngle - theta[i]);
+      }
+
+      let grooveTorque = 0;
+      if (g>0){
+        const phiG = grooveAngle(x[i],y[i]);
+        grooveTorque = -g*Math.sin(2*(theta[i]-phiG));
+      }
+
+      const dTheta = P.dt*(alignTorque+edgeTorque+fieldTorque+grooveTorque) + Math.sqrt(P.dt)*P.noise*gauss();
+      theta[i] = theta[i] + dTheta;
+
+      const dHealth = -P.kInjury*excess + (1-health[i])/P.tauRepair;
+      newHealth[i] = Math.min(1, Math.max(P.healthFloor, health[i]+P.dt*dHealth));
+
+      const dBeta = (P.betaMax*newHealth[i]-beta[i])/P.tauRecover - beta[i]*(Eeff/P.Eref)/P.tauAdapt;
+      newBeta[i] = Math.max(0, beta[i]+P.dt*dBeta);
+
+      // confinement wall
+      let wallFx=0, wallFy=0;
+      const over = r > (R_TISSUE - 0.5*P.r0);
+      if (over){
+        const push = P.kWall*(r-(R_TISSUE-0.5*P.r0));
+        wallFx = -push*(x[i]/r); wallFy = -push*(y[i]/r);
+      }
+
+      const crowd = 1/(1+Math.pow(rho[i]/P.rhoCrowd, P.crowdExp));
+      const gas = 1 + P.kSpeed*(newBeta[i]/P.betaMax)*Math.min(Eeff,2.0);
+      const propX = P.v0*crowd*newHealth[i]*gas*Math.cos(theta[i]);
+      const propY = P.v0*crowd*newHealth[i]*gas*Math.sin(theta[i]);
+      dispX[i] = P.dt*(propX + P.mobility*(F_x[i]+wallFx));
+      dispY[i] = P.dt*(propY + P.mobility*(F_y[i]+wallFy));
+    }
+
+    for (let i=0;i<N;i++){ x[i]+=dispX[i]; y[i]+=dispY[i]; health[i]=newHealth[i]; beta[i]=newBeta[i]; }
+
+    damageAccum += damagedCount/N;
+    state.t += 1;
+
+    if (state.divOn && N < P.maxN){
+      const born=[];
+      for (let i=0;i<N;i++){
+        const rate = P.pDiv*Math.max(0, Math.min(1, 1-rho[i]/P.rhoDiv));
+        if (rng() < rate*P.dt) born.push(i);
+      }
+      for (const p of born){
+        if (N>=P.maxN) break;
+        const ang = rng()*Math.PI*2;
+        x.push(x[p]+0.35*P.r0*Math.cos(ang));
+        y.push(y[p]+0.35*P.r0*Math.sin(ang));
+        theta.push(rng()*Math.PI*2);
+        health.push(health[p]); beta.push(beta[p]);
+        N++;
+      }
+    }
+  }
+
+  function measure(){
+    grid.build(x,y,N);
+    cacheAngles(theta,N,liveWork);
+    const uncovered = countUncovered(woundGridX,woundGridY,x,y,liveWork);
+    const area = uncovered*0.16;
+    // Safety fallback only -- resetSim() always sets area0 from the real t=0
+    // measurement, so this should never actually fire in normal use.
+    if (area0<=0) area0 = Math.max(area, 0.16);
+
+    // Same occupancy test, sampled in a ring far from the wound. This is a
+    // SAME-CONDITION reference, not a cue-free/undisturbed one -- whatever
+    // groove or field is globally selected still acts out here too.
+    const distUncovered = countUncovered(distRefX,distRefY,x,y,liveWork);
+    const distRefPct = distRefX.length>0 ? 100*distUncovered/distRefX.length : 0;
+
+    // Only measure alignment to the groove axis while the groove is actually
+    // exerting a torque (gain>0) -- at depth 0 there is no physical guidance, so
+    // any incidental alignment to that (inactive) axis, e.g. from the field
+    // pushing cells radially, is not a "groove alignment" reading and must not
+    // be reported as one.
+    const grooveIsActive = grooveGain() > 0;
+    let radialSum=0, grooveSumGlobal=0, grooveNGlobal=0;
+    // Wound-front metrics, SYMMETRIC around the wound boundary: a cell that has
+    // already crossed to r<R_WOUND is still the advancing front, not something
+    // that should drop out of "front" the moment it enters the gap.
+    let radialSumFront=0, frontN=0, grooveSumFront=0, grooveNFront=0;
+    for (let i=0;i<N;i++){
+      const r = Math.max(Math.hypot(x[i],y[i]),1e-9);
+      const rad = -( (liveWork.cosTheta[i]*(x[i]/r)) + (liveWork.sinTheta[i]*(y[i]/r)) );
+      radialSum += rad;
+      const inFront = (r >= R_WOUND-FRONT_BAND && r <= R_WOUND+FRONT_BAND);
+      if (inFront){ radialSumFront += rad; frontN++; }
+      if (grooveIsActive){
+        const phiG = grooveAngle(x[i],y[i]);
+        const gAlign = Math.cos(2*(theta[i]-phiG));
+        grooveSumGlobal += gAlign; grooveNGlobal++;
+        if (inFront){ grooveSumFront += gAlign; grooveNFront++; }
+      }
+    }
+    return {
+      // NOT clamped to [0,100]: if the wound genuinely widens past its t=0
+      // size (e.g. strong tension-driven retraction -- see the Shim et al.
+      // citation above), areaPct can legitimately exceed 100% and closure
+      // (100-areaPct) can go negative. Clamping here would hide exactly the
+      // "tissue got worse, not better" case this model should be able to show.
+      areaPct: 100*area/area0,
+      distRefPct: Math.max(0, Math.min(100, distRefPct)),
+      radialOrder: radialSum/N,
+      radialOrderFront: frontN>0 ? radialSumFront/frontN : null,
+      grooveOrderGlobal: grooveNGlobal>0 ? grooveSumGlobal/grooveNGlobal : null,
+      grooveOrderFront: grooveNFront>0 ? grooveSumFront/grooveNFront : null,
+      damagePct: 100*damageAccum/Math.max(state.t,1),
+    };
+  }
+
+  // ---- rendering ----
+  const canvas = document.getElementById("scope");
+  const ctx = canvas.getContext("2d");
+  const VIEW = R_TISSUE + 3;
+  let canvasWidth=0, canvasHeight=0;
+  let scopeBg="#081210", scopeField="#6ab3ff", scopeGroove="#f0c14b";
+
+  function resizeCanvas(){
+    const rect = canvas.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio||1, 2);
+    canvasWidth=rect.width; canvasHeight=rect.height;
+    canvas.width = Math.round(rect.width*dpr);
+    canvas.height = Math.round(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const styles=getComputedStyle(document.documentElement);
+    scopeBg=styles.getPropertyValue('--scope-bg').trim()||scopeBg;
+    scopeField=styles.getPropertyValue('--scope-field').trim()||scopeField;
+    scopeGroove=styles.getPropertyValue('--scope-groove').trim()||scopeGroove;
+  }
+
+  const healthColorCache=new Map();
+  function healthColor(h){
+    const t = Math.max(0, Math.min(1, (1-h)/(1-P.healthFloor)));
+    const r=Math.round(143+81*t), gC=Math.round(215-77*t), b=Math.round(201-109*t);
+    const key=(r<<16)|(gC<<8)|b;
+    let color=healthColorCache.get(key);
+    if (!color){ color=`rgb(${r},${gC},${b})`; healthColorCache.set(key,color); }
+    return color;
+  }
+
+  function draw(){
+    const w=canvasWidth, h=canvasHeight;
+    const scale = Math.min(w,h)/(2*VIEW);
+    const cx = w/2, cy = h/2;
+    const sx = (px)=> cx + px*scale;
+    const sy = (py)=> cy - py*scale;
+
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = scopeBg;
+    ctx.fillRect(0,0,w,h);
+
+    // tissue boundary
+    ctx.strokeStyle = "rgba(143,215,201,.18)";
+    ctx.beginPath(); ctx.arc(sx(0),sy(0), R_TISSUE*scale, 0, Math.PI*2); ctx.stroke();
+
+    // wound boundary -- this fixed circle, centred on the origin, is the ONLY region
+    // "open wound area" measures. It never moves and is unrelated to gaps that open
+    // up elsewhere in the tissue (e.g. from flocking) -- a faint fill makes that
+    // region legible on its own, independent of whatever the dashed line is doing.
+    ctx.fillStyle = "rgba(255,255,255,.05)";
+    ctx.beginPath(); ctx.arc(sx(0),sy(0), R_WOUND*scale, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,.55)";
+    ctx.lineWidth = 1.3;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.arc(sx(0),sy(0), R_WOUND*scale, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1;
+
+    // reference annulus -- far from the wound, roughly where "distant
+    // reference gap" samples, so its number has a visible home on the canvas
+    ctx.strokeStyle = "rgba(255,255,255,.18)";
+    ctx.setLineDash([1,4]);
+    ctx.beginPath(); ctx.arc(sx(0),sy(0), DIST_REF_LO*scale, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(sx(0),sy(0), DIST_REF_HI*scale, 0, Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // field direction -- drawn OUTSIDE the tissue boundary (r > R_TISSUE) so a dense
+    // ring of cells can never cover it, as small inward-marching arrows with a slow
+    // pulse (motion reads as "direction" far better than a static arrowhead does).
+    // In pulsed mode, only draw the moving arrows during the "on" half of the
+    // duty cycle (mirrors step()'s own Emag gating) -- otherwise the arrows
+    // kept animating through the "off" phase, misrepresenting the field as
+    // continuously active when it wasn't. An explicit off-phase label makes
+    // the pause legible instead of the field just silently vanishing.
+    const pulsedPhaseOn = !state.pulsed || (Math.floor(state.t/20)%2===0);
+    if (state.fieldOn && state.amp>0 && state.pulsed && !pulsedPhaseOn){
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,.55)";
+      ctx.font = "11px system-ui, -apple-system, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("field off (pulse)", sx(0), sy(-(R_TISSUE+5.5)));
+      ctx.restore();
+    }
+    if (state.fieldOn && state.amp>0 && pulsedPhaseOn){
+      // A fixed bright blue tuned against the scope's own dark background
+      // (independent of the page's light/dark --field token, which is far too
+      // muted here, especially at low screen brightness), plus a brighter glow
+      // pass under each arrow and a higher opacity floor so the pulse never
+      // fades to near-invisible.
+      const fieldColor = scopeField;
+      const tNow = performance.now()/1000;
+      const nArr = 16;
+      const rOuter = R_TISSUE + 2.3, rInner = R_TISSUE + 0.35;
+      for (let k=0;k<nArr;k++){
+        const a = k*2*Math.PI/nArr + 0.1;
+        // phase creeps each tick inward, then wraps -- reads as continuous inward flow
+        const phase = ((tNow*0.6 + k*0.13) % 1);
+        const r0 = rOuter - phase*(rOuter-rInner);
+        const r1 = Math.max(rInner, r0-1.1);
+        const fade = 0.6 + 0.4*Math.sin(phase*Math.PI); // fade in/out along the run, never below 0.6
+        const px0 = Math.cos(a)*r0, py0=Math.sin(a)*r0;
+        const px1 = Math.cos(a)*r1, py1=Math.sin(a)*r1;
+        const X0=sx(px0), Y0=sy(py0), X1=sx(px1), Y1=sy(py1);
+        ctx.strokeStyle = fieldColor; ctx.fillStyle = fieldColor;
+        ctx.lineCap = "round";
+        // soft glow pass (wider, translucent) under the crisp arrow for punch
+        ctx.globalAlpha = fade*0.35; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(X0,Y0); ctx.lineTo(X1,Y1); ctx.stroke();
+        ctx.globalAlpha = fade; ctx.lineWidth = 3.2;
+        ctx.beginPath(); ctx.moveTo(X0,Y0); ctx.lineTo(X1,Y1); ctx.stroke();
+        const ang = Math.atan2(Y1-Y0, X1-X0);
+        ctx.beginPath(); ctx.moveTo(X1,Y1);
+        ctx.lineTo(X1-Math.cos(ang-0.5)*6.5, Y1-Math.sin(ang-0.5)*6.5);
+        ctx.lineTo(X1-Math.cos(ang+0.5)*6.5, Y1-Math.sin(ang+0.5)*6.5);
+        ctx.closePath(); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      // ring marking where the field is "applied", so the arrows read as a
+      // field acting on the tissue boundary rather than floating marks
+      ctx.strokeStyle = fieldColor; ctx.globalAlpha = 0.4; ctx.lineWidth = 1.3;
+      ctx.beginPath(); ctx.arc(sx(0),sy(0), R_TISSUE*scale, 0, Math.PI*2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+
+    // cells
+    ctx.strokeStyle = "rgba(255,255,255,.35)";
+    ctx.lineWidth = 0.5;
+    const cellRx=Math.max(1.6,0.62*scale), cellRy=cellRx*0.6;
+    for (let i=0;i<N;i++){
+      const X = sx(x[i]), Y = sy(y[i]);
+      if (X<-5||X>w+5||Y<-5||Y>h+5) continue;
+      ctx.fillStyle = healthColor(health[i]);
+      ctx.beginPath(); ctx.ellipse(X,Y,cellRx,cellRy,-theta[i],0,Math.PI*2); ctx.fill(); ctx.stroke();
+    }
+
+    // groove lines, drawn ON TOP of the cells -- packed cells cover almost the
+    // whole tissue disc, so drawing this earlier (as it used to be) left the
+    // geometry invisible under them for anything but the first frame or two.
+    if (state.groove!=="none" && grooveGain()>0){
+      ctx.strokeStyle = scopeGroove;
+      ctx.globalAlpha = 0.6;
+      ctx.lineWidth = 1.3;
+      if (state.groove==="radial"){
+        const nLines=16;
+        for (let k=0;k<nLines;k++){
+          const a = k*2*Math.PI/nLines;
+          ctx.beginPath(); ctx.moveTo(sx(0),sy(0)); ctx.lineTo(sx(Math.cos(a)*R_TISSUE), sy(Math.sin(a)*R_TISSUE)); ctx.stroke();
+        }
+      } else if (state.groove==="tangential"){
+        for (let r=3; r<R_TISSUE; r+=3){
+          ctx.beginPath(); ctx.arc(sx(0),sy(0), r*scale, 0, Math.PI*2); ctx.stroke();
+        }
+      } else if (state.groove==="parallel"){
+        // Straight, evenly-spaced lines in one fixed direction, independent of
+        // where the wound sits -- the manufacturable pattern, as opposed to
+        // the two idealized wound-centred patterns above.
+        for (let yy=-R_TISSUE; yy<=R_TISSUE; yy+=3){
+          const xMax = Math.sqrt(Math.max(0, R_TISSUE*R_TISSUE - yy*yy));
+          if (xMax<=0) continue;
+          ctx.beginPath(); ctx.moveTo(sx(-xMax), sy(yy)); ctx.lineTo(sx(xMax), sy(yy)); ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ---- UI wiring ----
+  const els = {
+    play: document.getElementById("playBtn"),
+    reset: document.getElementById("resetBtn"),
+    step: document.getElementById("stepReadout"),
+    mArea: document.getElementById("mArea"),
+    mRef: document.getElementById("mRef"),
+    mOrder: document.getElementById("mOrder"),
+    mOrderFront: document.getElementById("mOrderFront"),
+    mGroove: document.getElementById("mGroove"),
+    mDamage: document.getElementById("mDamage"),
+    grooveButtons: Array.from(document.querySelectorAll("#grooveMode button")),
+    depth: document.getElementById("depth"),
+    depthOut: document.getElementById("depthOut"),
+    fieldOn: document.getElementById("fieldOn"),
+    fieldBlock: document.getElementById("fieldBlock"),
+    amp: document.getElementById("amp"),
+    ampOut: document.getElementById("ampOut"),
+    pulsedOn: document.getElementById("pulsedOn"),
+    divOn: document.getElementById("divOn"),
+    grooveDepthBlock: document.getElementById("grooveDepthBlock"),
+    presets: Array.from(document.querySelectorAll("#presets button")),
+    caption: document.getElementById("conditionCaption"),
+    newSeed: document.getElementById("newSeedBtn"),
+    runBatch: document.getElementById("runBatchBtn"),
+    batchOutput: document.getElementById("batchOutput"),
+  };
+
+  // Plain-language description of whatever combination of groove + field is
+  // currently selected -- covers the five validated presets by name, and still
+  // describes anything reached by hand-toggling the controls instead.
+  const PRESET_NAMES = { "none|0": "C1", "radial|0": "C2", "none|1": "C3", "radial|1": "C4", "tangential|1": "C5" };
+  const PRESET_TITLES = { C1:"flat control", C2:"groove only", C3:"field only", C4:"groove + field, aligned", C5:"groove ⊥ field" };
+  const PRESET_BLURBS = {
+    C1: "Baseline for how well the tissue closes the gap unaided.",
+    C2: "Tests contact guidance alone, with no electric cue.",
+    C3: "Tests the bioelectric cue alone, with no membrane topography.",
+    C4: "Both cues point the same way — tests whether aligned contact guidance and field combine, cancel, or compete. Not assumed to be the best-performing case: read the metrics.",
+    C5: "A conflict test: groove and field disagree on axis. Which one dominates, at these parameter values?",
+  };
+  function describeCondition(){
+    // depth<=0 / amplitude below threshold both mean the cue exerts zero real
+    // torque, whatever button is lit -- so the tag follows what's physically
+    // active, not just which controls are selected.
+    const grooveActive = state.groove!=="none" && state.depth>0;
+    const fieldActive = state.fieldOn && state.amp > P.Ethresh;
+    const rawMatches = (grooveActive === (state.groove!=="none")) && (fieldActive === state.fieldOn);
+    const effKey = `${grooveActive ? state.groove : "none"}|${fieldActive?1:0}`;
+    const tag = PRESET_NAMES[effKey];
+
+    // Selected controls genuinely match what's active: the full, explained version.
+    if (rawMatches){
+      const axisLabel = state.groove==="radial" ? "aligned with the closing direction (idealized)"
+        : state.groove==="tangential" ? "perpendicular to the closing direction (idealized)"
+        : "in one fixed lab-frame direction (a manufacturable straight-line pattern, not wound-centred)";
+      const grooveText = state.groove==="none" ? "no groove topography" : `grooves ${axisLabel}`;
+      const fieldText = state.fieldOn ? `a convergent bioelectric field biasing electrotactic migration inward${state.pulsed?" (pulsed)":""}` : "no field";
+      const combo = `${grooveText}, ${fieldText}`;
+      // Only call this a "pulsed variant" when there's an actual field to
+      // pulse -- state.pulsed can stay true after the user switches the
+      // field off (nothing clears the checkbox for them), and a flat/no-field
+      // condition mislabelled as "pulsed" is confusing, not honest.
+      const pulsedActive = state.pulsed && state.fieldOn;
+      if (tag && !pulsedActive) return `<b>${tag} — ${PRESET_TITLES[tag]}.</b> ${combo}. ${PRESET_BLURBS[tag]}`;
+      if (tag && pulsedActive) return `<b>${tag} (pulsed variant) — ${PRESET_TITLES[tag]}.</b> ${combo}. ${PRESET_BLURBS[tag]}`;
+      return `<b>Custom.</b> ${combo}.`;
+    }
+    // At least one selected cue isn't actually doing anything at these values --
+    // but say which one. The other cue can still be fully active (e.g. a groove
+    // axis with the field zeroed out), so a blanket "no real effect" would be
+    // wrong here, not just imprecise.
+    const grooveNote = state.groove==="none" ? "no groove"
+      : grooveActive ? (state.groove==="radial" ? "groove ∥ active" : state.groove==="tangential" ? "groove ⊥ active" : "groove ‖ (parallel) active")
+      : `${state.groove} groove selected, inactive (depth 0)`;
+    const fieldNote = !state.fieldOn ? "no field"
+      : fieldActive ? "field active"
+      : "field selected, inactive (below threshold)";
+    return tag
+      ? `<b>${tag}</b> — same as ${PRESET_TITLES[tag]} at these values (${grooveNote}; ${fieldNote})`
+      : `<b>Custom</b> — ${grooveNote}; ${fieldNote}`;
+  }
+  function updateCaption(){ els.caption.innerHTML = describeCondition(); }
+
+  function syncGrooveButtons(){
+    els.grooveButtons.forEach(b=>{
+      const mode = b.dataset.g;
+      b.classList.toggle("active", mode===state.groove);
+    });
+    els.grooveDepthBlock.dataset.off = (state.groove==="none").toString();
+    updateCaption();
+  }
+  // Groove mode and field on/off define WHICH condition you're running, same as a
+  // preset button does -- so, like a preset click, changing either resets the run.
+  // Otherwise leftover cells/damage from whatever was running before keep showing
+  // through under the new condition's label, which is exactly what produced the
+  // "flat but somehow already 12% open / 32% damage" reading.
+  els.grooveButtons.forEach(b=> b.addEventListener("click", ()=>{
+    state.groove = b.dataset.g; syncGrooveButtons(); syncPresetActive(); doReset();
+  }));
+
+  // A tight snap, only to clean up float rounding right at a labelled reference
+  // value (e.g. 0.7999999999) -- NOT a wide catch net. A wide tolerance here
+  // would swallow real, distinct step values near a tick (0.7 and 0.9 both
+  // becoming unreachable near the 0.8 mark), which is worse than the float noise
+  // it was meant to fix.
+  const DEPTH_TICKS = [0, 0.3, 0.8, 2, 5];
+  const AMP_TICKS = [0, 0.5, 1, 2, 4, 8];
+  function snapToTick(value, ticks, tol){
+    for (const t of ticks){ if (Math.abs(value-t) <= tol) return t; }
+    return value;
+  }
+
+  els.depth.addEventListener("input", ()=>{
+    const snapped = snapToTick(parseFloat(els.depth.value), DEPTH_TICKS, 0.03);
+    state.depth = snapped; els.depth.value = snapped;
+    els.depthOut.textContent = state.depth.toFixed(1)+" µm"; syncPresetActive(); updateCaption();
+  });
+  // 'change' (fires once, on release) rather than 'input' (fires continuously
+  // while dragging) -- resetting on every 'input' tick would make the tissue
+  // never evolve while dragging; resetting on 'change' still guarantees a
+  // depth/amplitude tweak can't silently mix two conditions' histories in one
+  // run, without fighting the drag itself.
+  els.depth.addEventListener("change", doReset);
+
+  els.fieldOn.addEventListener("change", ()=>{
+    state.fieldOn = els.fieldOn.checked;
+    els.fieldBlock.dataset.off = (!state.fieldOn).toString();
+    syncPresetActive();
+    updateCaption();
+    doReset();
+  });
+  els.amp.addEventListener("input", ()=>{
+    // Amplitude's ticks sit far apart (0.5, 1, 2, 4, 8 -- the closest gap is
+    // 0.5), so a real capture radius here is safe: 0.15 pulls in only each
+    // tick's immediate ±0.1 neighbour, never reaching a different tick.
+    const snapped = snapToTick(parseFloat(els.amp.value), AMP_TICKS, 0.15);
+    state.amp = snapped; els.amp.value = snapped;
+    els.ampOut.textContent = state.amp.toFixed(1); syncPresetActive(); updateCaption();
+  });
+  els.amp.addEventListener("change", doReset);
+  els.divOn.addEventListener("change", ()=>{ state.divOn = els.divOn.checked; syncPresetActive(); doReset(); });
+
+  // Highlights whichever preset button (if any) the CURRENT controls exactly
+  // match -- not just "was the last preset clicked". Reaching a preset's exact
+  // settings by hand (e.g. clicking Flat while field is already on at amp 1)
+  // should show it as selected too, same as the caption already reports it.
+  function syncPresetActive(){
+    els.presets.forEach(b=>{
+      const cfg = PRESETS[b.dataset.p];
+      const match = cfg.groove===state.groove && cfg.depth===state.depth && cfg.fieldOn===state.fieldOn && cfg.amp===state.amp && cfg.divOn===state.divOn && cfg.pulsed===state.pulsed;
+      b.classList.toggle("active", match);
+    });
+  }
+
+  const PRESETS = {
+    C1: { groove:"none", depth:5, fieldOn:false, amp:1.0, divOn:false, pulsed:false },
+    C2: { groove:"radial", depth:5, fieldOn:false, amp:1.0, divOn:false, pulsed:false },
+    C3: { groove:"none", depth:5, fieldOn:true, amp:1.0, divOn:false, pulsed:false },
+    C4: { groove:"radial", depth:5, fieldOn:true, amp:1.0, divOn:false, pulsed:false },
+    C5: { groove:"tangential", depth:5, fieldOn:true, amp:1.0, divOn:false, pulsed:false },
+  };
+  els.presets.forEach(b=> b.addEventListener("click", ()=>{
+    const cfg = PRESETS[b.dataset.p];
+    state.groove=cfg.groove; state.depth=cfg.depth; state.fieldOn=cfg.fieldOn; state.amp=cfg.amp; state.divOn=cfg.divOn; state.pulsed=cfg.pulsed;
+    els.depth.value=cfg.depth; els.depthOut.textContent=cfg.depth.toFixed(1)+" µm";
+    els.fieldOn.checked=cfg.fieldOn; els.fieldBlock.dataset.off=(!cfg.fieldOn).toString();
+    els.amp.value=cfg.amp; els.ampOut.textContent=cfg.amp.toFixed(1);
+    els.divOn.checked=cfg.divOn;
+    els.pulsedOn.checked=cfg.pulsed;
+    syncGrooveButtons();
+    els.presets.forEach(x=>x.classList.remove("active")); b.classList.add("active");
+    doReset();
+  }));
+  els.pulsedOn.addEventListener("change", ()=>{ state.pulsed = els.pulsedOn.checked; syncPresetActive(); updateCaption(); doReset(); });
+
+  els.play.addEventListener("click", ()=>{
+    state.running = !state.running;
+    els.play.textContent = state.running ? "Pause" : "Run";
+  });
+  function doReset(){
+    resetSim();
+    // Recompute metrics immediately -- otherwise the PREVIOUS condition's
+    // readings stay on screen for a few animation frames after switching,
+    // which briefly mislabels the new condition with the old one's numbers.
+    lastMetrics = measure();
+    updateReadouts();
+    els.play.textContent = "Pause"; state.running = true;
+  }
+  els.reset.addEventListener("click", doReset);
+  els.newSeed.addEventListener("click", ()=>{
+    state.seed = Math.floor(Math.random()*1e9);
+    doReset();
+  });
+
+  // ---- batch comparison: an isolated copy of the physics, run headlessly
+  // (no canvas, no shared mutable state with the live animation) so C1-C5 can
+  // be compared quantitatively from the identical starting tissue without
+  // touching whatever is currently playing on screen. ----
+  function batchGrooveAngle(groove, px, py){
+    if (groove === "parallel") return 0;
+    const base = Math.atan2(py, px);
+    return groove === "tangential" ? base + Math.PI/2 : base;
+  }
+  function batchGrooveGain(groove, depth){
+    if (groove === "none" || depth<=0) return 0;
+    return GROOVE_GAIN_MAX * depth / (depth + GROOVE_DEPTH_HALF);
+  }
+  function makeBatchSim(seed, cfg){
+    const rng = mulberry32(seed);
+    const gauss = makeGaussian(rng);
+    const seeded = seedCells(rng); // full disc
+    const sim = {
+      x: Array.from(seeded.x), y: Array.from(seeded.y), theta: Array.from(seeded.theta),
+      N: seeded.n, health: new Array(seeded.n).fill(1.0), beta: new Array(seeded.n).fill(P.betaMax),
+      t: 0, damageAccum: 0, rng, gauss,
+      groove: "none", depth: 0, fieldOn: false, amp: 0, divOn: false, pulsed: false,
+    };
+    for (let s=0; s<EQUIL_STEPS; s++) batchStep(sim); // mechanically equilibrate the intact disc first
+    const keep=[];
+    for (let i=0;i<sim.N;i++) if (!insideWoundShape(sim.x[i], sim.y[i])) keep.push(i);
+    sim.x = keep.map(i=>sim.x[i]); sim.y = keep.map(i=>sim.y[i]); sim.theta = keep.map(i=>sim.theta[i]);
+    sim.health = keep.map(i=>sim.health[i]); sim.beta = keep.map(i=>sim.beta[i]);
+    sim.N = keep.length;
+    sim.t = 0; sim.damageAccum = 0;
+    sim.groove = cfg.groove; sim.depth = cfg.depth; sim.fieldOn = cfg.fieldOn; sim.amp = cfg.amp;
+    sim.divOn = !!cfg.divOn; sim.pulsed = !!cfg.pulsed;
+    // Same fix as the live resetSim(): area0 is the actually-measured open
+    // area right after cutting, not the raw geometric wound-circle area.
+    grid.build(sim.x, sim.y, sim.N);
+    cacheAngles(sim.theta,sim.N,batchWork);
+    sim.area0 = Math.max(countUncovered(woundGridX,woundGridY,sim.x,sim.y,batchWork) * 0.16, 0.16);
+    return sim;
+  }
+  function batchStep(sim){
+    const {x,y,theta,N} = sim;
+    grid.build(x,y,N);
+    const {F_x,F_y,rho,free_x,free_y,sumC,sumS,nSelf,tension,
+      newHealth,newBeta,dispX,dispY,cosTheta,sinTheta} = batchWork;
+    clearAccumulationBuffers(batchWork,N);
+    cacheAngles(theta,N,batchWork);
+    for (let i=0;i<N;i++){ sumC[i]=cosTheta[i]; sumS[i]=sinTheta[i]; nSelf[i]=1; }
+    for (let i=0;i<N;i++){
+      grid.forNeighbours(x[i],y[i], function(j){
+        if (j<=i) return;
+        const dx = x[j]-x[i], dy = y[j]-y[i];
+        const d = Math.max(Math.hypot(dx,dy), 1e-9);
+        if (d >= P.rCut) return;
+        const ux = dx/d, uy = dy/d;
+        let mag = 0;
+        if (d < P.r0) mag = -P.kRep*(P.r0-d);
+        else if (d < P.rAdh) mag = P.kAdh*Math.min(d-P.r0, P.adhCap);
+        const fx = mag*ux, fy = mag*uy;
+        F_x[i]+=fx; F_y[i]+=fy; F_x[j]-=fx; F_y[j]-=fy;
+        const w = Math.pow(1-d/P.rCut, 2);
+        rho[i]+=w; rho[j]+=w;
+        free_x[i]-=w*ux; free_y[i]-=w*uy; free_x[j]+=w*ux; free_y[j]+=w*uy;
+        sumC[i]+=cosTheta[j]; sumC[j]+=cosTheta[i];
+        sumS[i]+=sinTheta[j]; sumS[j]+=sinTheta[i];
+        nSelf[i]+=1; nSelf[j]+=1;
+        if (mag>0){ const ten=mag*d; tension[i]+=0.5*ten; tension[j]+=0.5*ten; }
+      });
+    }
+    let damagedCount=0;
+    const g = batchGrooveGain(sim.groove, sim.depth);
+    for (let i=0;i<N;i++){
+      const excess = Math.max(tension[i]-P.tensionCrit, 0);
+      if (excess>0) damagedCount++;
+      const mc = sumC[i]/nSelf[i], ms = sumS[i]/nSelf[i];
+      const ct = cosTheta[i], st = sinTheta[i];
+      const alignTorque = P.Jalign*(ms*ct - mc*st);
+      const r = Math.max(Math.hypot(x[i],y[i]), 1e-9);
+      const outX = x[i]/r, outY = y[i]/r;
+      const fn = Math.hypot(free_x[i],free_y[i]);
+      let edgeTorque = 0;
+      if (rho[i] < P.rhoEdge && fn > 1e-9){
+        const fxN = free_x[i]/fn, fyN = free_y[i]/fn;
+        const facesInward = (fxN*outX + fyN*outY) < 0;
+        if (facesInward) edgeTorque = P.Jedge*(fyN*ct - fxN*st);
+      }
+      const inwardAngle = Math.atan2(-y[i], -x[i]);
+      const EmagBase = sim.fieldOn ? sim.amp : 0;
+      const Emag = sim.pulsed ? (Math.floor(sim.t/20)%2===0 ? EmagBase : 0) : EmagBase;
+      const Eeff = Math.max(Emag - P.Ethresh, 0);
+      let fieldTorque = 0;
+      if (Eeff > 1e-9) fieldTorque = sim.beta[i]*Math.min(Eeff,2.0)*Math.sin(inwardAngle - theta[i]);
+      let grooveTorque = 0;
+      if (g>0){
+        const phiG = batchGrooveAngle(sim.groove, x[i],y[i]);
+        grooveTorque = -g*Math.sin(2*(theta[i]-phiG));
+      }
+      const dTheta = P.dt*(alignTorque+edgeTorque+fieldTorque+grooveTorque) + Math.sqrt(P.dt)*P.noise*sim.gauss();
+      theta[i] = theta[i] + dTheta;
+      const dHealth = -P.kInjury*excess + (1-sim.health[i])/P.tauRepair;
+      newHealth[i] = Math.min(1, Math.max(P.healthFloor, sim.health[i]+P.dt*dHealth));
+      const dBeta = (P.betaMax*newHealth[i]-sim.beta[i])/P.tauRecover - sim.beta[i]*(Eeff/P.Eref)/P.tauAdapt;
+      newBeta[i] = Math.max(0, sim.beta[i]+P.dt*dBeta);
+      let wallFx=0, wallFy=0;
+      const over = r > (R_TISSUE - 0.5*P.r0);
+      if (over){
+        const push = P.kWall*(r-(R_TISSUE-0.5*P.r0));
+        wallFx = -push*(x[i]/r); wallFy = -push*(y[i]/r);
+      }
+      const crowd = 1/(1+Math.pow(rho[i]/P.rhoCrowd, P.crowdExp));
+      const gas = 1 + P.kSpeed*(newBeta[i]/P.betaMax)*Math.min(Eeff,2.0);
+      const propX = P.v0*crowd*newHealth[i]*gas*Math.cos(theta[i]);
+      const propY = P.v0*crowd*newHealth[i]*gas*Math.sin(theta[i]);
+      dispX[i] = P.dt*(propX + P.mobility*(F_x[i]+wallFx));
+      dispY[i] = P.dt*(propY + P.mobility*(F_y[i]+wallFy));
+    }
+    for (let i=0;i<N;i++){ x[i]+=dispX[i]; y[i]+=dispY[i]; sim.health[i]=newHealth[i]; sim.beta[i]=newBeta[i]; }
+    sim.damageAccum += damagedCount/N;
+    sim.t += 1;
+  }
+  function batchMeasure(sim){
+    const {x,y,theta,N} = sim;
+    grid.build(x,y,N);
+    cacheAngles(theta,N,batchWork);
+    const uncovered = countUncovered(woundGridX,woundGridY,x,y,batchWork);
+    const area = uncovered*0.16;
+    const grooveIsActive = batchGrooveGain(sim.groove, sim.depth) > 0;
+    let radialSumFront=0, frontN=0, grooveSumFront=0, grooveNFront=0;
+    for (let i=0;i<N;i++){
+      const r = Math.max(Math.hypot(x[i],y[i]),1e-9);
+      const rad = -( (batchWork.cosTheta[i]*(x[i]/r)) + (batchWork.sinTheta[i]*(y[i]/r)) );
+      const inFront = (r >= R_WOUND-FRONT_BAND && r <= R_WOUND+FRONT_BAND);
+      if (inFront){ radialSumFront += rad; frontN++; }
+      if (grooveIsActive && inFront){
+        const phiG = batchGrooveAngle(sim.groove, x[i],y[i]);
+        grooveSumFront += Math.cos(2*(theta[i]-phiG)); grooveNFront++;
+      }
+    }
+    return {
+      areaPct: 100*area/sim.area0, // not clamped -- see live measure() for why
+      radialOrderFront: frontN>0 ? radialSumFront/frontN : null,
+      grooveOrderFront: grooveNFront>0 ? grooveSumFront/grooveNFront : null,
+      damagePct: 100*sim.damageAccum/Math.max(sim.t,1),
+    };
+  }
+  // Kept to exactly the five clickable presets (C1-C5) on purpose: the
+  // manufacturable "parallel" groove is fully explorable live via the
+  // Groove topography buttons, but adding batch-only C6/C7 rows with no
+  // corresponding preset button made the table show conditions a viewer
+  // couldn't actually click on or inspect -- confusing in a live walkthrough,
+  // for a completeness gain that wasn't worth it.
+  const BATCH_STEPS = 250;
+  const YIELD = () => new Promise(r => setTimeout(r, 0));
+  let batchRunning=false;
+  async function runBatchComparison(){
+    if (batchRunning) return;
+    batchRunning=true;
+    const liveWasRunning=state.running;
+    state.running=false;
+    els.play.disabled=true;
+    els.runBatch.disabled = true;
+    // Capture the seed ONCE, up front -- the batch run is async and yields
+    // control between conditions, so if the user hits "New seed" mid-run,
+    // reading state.seed fresh on every iteration would silently mix
+    // conditions from two different starting tissues into one table.
+    const batchSeed = state.seed;
+    const names = ["C1","C2","C3","C4","C5"];
+    const rows = [];
+    for (let idx=0; idx<names.length; idx++){
+      const name = names[idx];
+      const cfg = PRESETS[name];
+      els.runBatch.textContent = `Running ${name} (${idx+1}/${names.length})…`;
+      await YIELD(); // let the label actually repaint before the heavy loop below
+      const sim = makeBatchSim(batchSeed, cfg);
+      for (let s=0;s<BATCH_STEPS;s++){
+        batchStep(sim);
+        if (s>0 && s % 12 === 0) await YIELD(); // short chunks keep scrolling and controls responsive during the comparison
+      }
+      const m = batchMeasure(sim);
+      rows.push({ name, closure: 100-m.areaPct, area: m.areaPct, radialFront: m.radialOrderFront, grooveFront: m.grooveOrderFront, damage: m.damagePct });
+    }
+    const bestClosure = Math.max(...rows.map(r=>r.closure));
+    const html = `
+      <table class="batch-table">
+        <thead><tr><th>Condition</th><th>Closure %</th><th>Open area %</th><th>Radial order (fixed annulus)</th><th>Groove align. (fixed annulus)</th><th>Stress burden % (time-avg.)</th></tr></thead>
+        <tbody>
+          ${rows.map(r=>`<tr>
+            <td>${r.name}</td>
+            <td${r.closure===bestClosure?' class="best"':''}>${r.closure.toFixed(1)}</td>
+            <td>${r.area.toFixed(1)}</td>
+            <td>${r.radialFront===null?'n/a':(r.radialFront>=0?'+':'')+r.radialFront.toFixed(2)}</td>
+            <td>${r.grooveFront===null?'n/a':r.grooveFront.toFixed(2)}</td>
+            <td>${r.damage.toFixed(1)}</td>
+          </tr>`).join("")}
+        </tbody>
+      </table>
+      <p class="batch-note">Single run, seed ${batchSeed}, ${EQUIL_STEPS}-step pre-equilibration + ${BATCH_STEPS} model steps, division and pulsing off for all five conditions. Highest closure % is highlighted — this reflects this run's parameter values, not a claim about which cue "should" win; re-run with a new seed before treating any one ranking as robust.</p>`;
+    els.batchOutput.innerHTML = html;
+    els.runBatch.disabled = false;
+    els.runBatch.textContent = "Run all conditions";
+    els.play.disabled=false;
+    state.running=liveWasRunning;
+    els.play.textContent=state.running ? "Pause" : "Run";
+    batchRunning=false;
+  }
+  els.runBatch.addEventListener("click", ()=>{ runBatchComparison(); });
+
+  window.addEventListener("resize", resizeCanvas);
+
+  // Stop spending CPU on an animation the reader cannot see. The simulation
+  // resumes from the same state when the canvas returns to the viewport;
+  // there is deliberately no hidden catch-up work.
+  let simulationInView=true;
+  if ("IntersectionObserver" in window){
+    const visibilityObserver=new window.IntersectionObserver(entries=>{
+      simulationInView=entries.some(entry=>entry.isIntersecting);
+    },{rootMargin:"120px 0px"});
+    visibilityObserver.observe(canvas);
+  }
+
+  // ---- main loop ----
+  let lastMetrics = {areaPct:100, distRefPct:0, radialOrder:0, radialOrderFront:null, grooveOrderGlobal:null, grooveOrderFront:null, damagePct:0};
+  let frameCount=0;
+  function updateReadouts(){
+    els.step.textContent = `t = ${state.t} steps · N = ${N} cells · seed ${state.seed}`;
+    els.mArea.textContent = lastMetrics.areaPct.toFixed(0)+"%";
+    els.mRef.textContent = lastMetrics.distRefPct.toFixed(0)+"%";
+    els.mOrder.textContent = (lastMetrics.radialOrder>=0?"+":"")+lastMetrics.radialOrder.toFixed(2);
+    els.mOrderFront.textContent = lastMetrics.radialOrderFront===null ? "n/a" : (lastMetrics.radialOrderFront>=0?"+":"")+lastMetrics.radialOrderFront.toFixed(2);
+    els.mGroove.textContent = lastMetrics.grooveOrderFront===null ? "n/a (inactive)" : (lastMetrics.grooveOrderFront>=0?"+":"")+lastMetrics.grooveOrderFront.toFixed(2);
+    els.mDamage.textContent = lastMetrics.damagePct.toFixed(1)+"%";
+  }
+  function loop(){
+    if (!simulationInView || batchRunning){
+      requestAnimationFrame(loop);
+      return;
+    }
+    if (state.running){
+      step(); step(); // two model steps per rendered frame for a brisk pace
+      frameCount++;
+      if (frameCount % 6 === 0) lastMetrics = measure();
+    }
+    draw();
+    if (state.running && frameCount % 3 === 0) updateReadouts();
+    requestAnimationFrame(loop);
+  }
+
+  // The default `state` (C4-like: field on, radial groove) needs to be
+  // reflected in the checkbox/slider UI at load -- without this, e.g. the
+  // Field on switch shows unchecked even though the field is actually
+  // running, because no "checked" attribute is set in the HTML and nothing
+  // had synced it from state yet.
+  function syncControlsToState(){
+    els.depth.value = state.depth; els.depthOut.textContent = state.depth.toFixed(1)+" µm";
+    els.amp.value = state.amp; els.ampOut.textContent = state.amp.toFixed(1);
+    els.fieldOn.checked = state.fieldOn; els.fieldBlock.dataset.off = (!state.fieldOn).toString();
+    els.divOn.checked = state.divOn;
+    els.pulsedOn.checked = state.pulsed;
+  }
+
+  resizeCanvas();
+  syncControlsToState();
+  syncGrooveButtons();
+  syncPresetActive();
+  doReset();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+(() => {
+  "use strict";
+
+  const tabs = Array.from(document.querySelectorAll(".notes-tab"));
+  const panels = Array.from(document.querySelectorAll(".notes-part[role='tabpanel']"));
+
+  function activateTab(tab, moveFocus = false){
+    tabs.forEach(item => {
+      const selected = item === tab;
+      item.setAttribute("aria-selected", selected.toString());
+      item.tabIndex = selected ? 0 : -1;
+    });
+    panels.forEach(panel => {
+      panel.hidden = panel.id !== tab.getAttribute("aria-controls");
+    });
+    if (moveFocus) tab.focus();
+  }
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => activateTab(tab));
+    tab.addEventListener("keydown", event => {
+      let nextIndex = null;
+      if (event.key === "ArrowRight") nextIndex = (index + 1) % tabs.length;
+      if (event.key === "ArrowLeft") nextIndex = (index - 1 + tabs.length) % tabs.length;
+      if (event.key === "Home") nextIndex = 0;
+      if (event.key === "End") nextIndex = tabs.length - 1;
+      if (nextIndex === null) return;
+      event.preventDefault();
+      activateTab(tabs[nextIndex], true);
+    });
+  });
+})();
+</script>
