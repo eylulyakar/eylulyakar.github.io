@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Eylül Yakar — biomedical engineer and PhD student in Nanotechnology and Nanomedicine working on biomaterials, surface engineering, and regenerative medicine.">
+  <meta name="color-scheme" content="light">
+  <title>Eylül Yakar | Biomedical Engineer & PhD Student</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --paper: #f3f2ed;
+      --surface: #fbfbf8;
+      --ink: #142126;
+      --ink-soft: #334148;
+      --muted: #657177;
+      --line: #d6d9d4;
+      --teal: #286b64;
+      --teal-soft: #dcebe6;
+      --blue: #315b8a;
+      --blue-soft: #e4ebf3;
+      --ochre: #9b6b2f;
+      --ochre-soft: #eee6d7;
+      --shadow: 0 14px 44px rgba(20, 33, 38, .07);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background:
+        linear-gradient(rgba(20, 33, 38, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 33, 38, .025) 1px, transparent 1px),
+        var(--paper);
+      background-size: 32px 32px;
+      color: var(--ink-soft);
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    a { color: inherit; }
+    a:focus-visible, button:focus-visible {
+      outline: 3px solid rgba(49, 91, 138, .35);
+      outline-offset: 3px;
+    }
+    .shell { width: min(1180px, calc(100% - 40px)); margin: 0 auto; }
+    .eyebrow {
+      margin: 0 0 14px;
+      color: var(--blue);
+      font: 500 .73rem/1.35 "IBM Plex Mono", monospace;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3 {
+      margin-top: 0;
+      color: var(--ink);
+      font-family: "Source Serif 4", Georgia, serif;
+      font-weight: 600;
+      text-wrap: balance;
+    }
+    h1 { margin-bottom: 20px; font-size: clamp(3.7rem, 8vw, 7.3rem); line-height: .88; letter-spacing: -.055em; }
+    h2 { margin-bottom: 18px; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.04; letter-spacing: -.035em; }
+    h3 { margin-bottom: 10px; font-size: 1.28rem; line-height: 1.22; }
+    p { margin: 0 0 1em; }
+    section { scroll-margin-top: 92px; }
+
+    .site-header {
+      position: sticky;
+      z-index: 10;
+      top: 0;
+      border-bottom: 1px solid rgba(214, 217, 212, .9);
+      background: rgba(243, 242, 237, .91);
+      backdrop-filter: blur(14px);
+    }
+    .nav {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .brand-mark {
+      width: 34px;
+      aspect-ratio: 1;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--ink);
+      border-radius: 50%;
+      font: 500 .7rem/1 "IBM Plex Mono", monospace;
+    }
+    .nav-links { display: flex; align-items: center; gap: 26px; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .86rem;
+      font-weight: 500;
+    }
+    .nav-links a:hover { color: var(--ink); }
+
+    .hero {
+      min-height: calc(100vh - 72px);
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+      align-items: center;
+      gap: clamp(40px, 8vw, 112px);
+      padding: 84px 0 92px;
+    }
+    .hero-copy { max-width: 760px; }
+    .hero-lede {
+      max-width: 720px;
+      margin-bottom: 30px;
+      color: var(--ink-soft);
+      font: 500 clamp(1.2rem, 2.2vw, 1.6rem)/1.45 "Source Serif 4", Georgia, serif;
+    }
+    .hero-detail { max-width: 650px; color: var(--muted); }
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 600;
+      transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .button:hover { transform: translateY(-2px); box-shadow: 0 9px 25px rgba(20, 33, 38, .14); }
+    .button.secondary { background: transparent; color: var(--ink); }
+    .button.secondary:hover { background: var(--surface); }
+    .arrow { font-size: 1.08rem; }
+
+    .research-lens {
+      position: relative;
+      overflow: hidden;
+      padding: 28px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(251, 251, 248, .86);
+      box-shadow: var(--shadow);
+    }
+    .research-lens::before {
+      position: absolute;
+      inset: -80px -80px auto auto;
+      width: 210px;
+      aspect-ratio: 1;
+      border: 42px solid var(--teal-soft);
+      border-radius: 50%;
+      content: "";
+      opacity: .75;
+    }
+    .lens-title { position: relative; margin-bottom: 28px; font-size: 1.62rem; line-height: 1.13; }
+    .lens-stack { position: relative; display: grid; gap: 10px; }
+    .lens-layer {
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+    .lens-layer small {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--muted);
+      font: 500 .65rem/1.3 "IBM Plex Mono", monospace;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .lens-layer strong { color: var(--ink); font-size: .94rem; }
+    .lens-layer:nth-child(1) { margin-right: 42px; border-left: 3px solid var(--ochre); }
+    .lens-layer:nth-child(2) { margin-left: 21px; margin-right: 21px; border-left: 3px solid var(--blue); }
+    .lens-layer:nth-child(3) { margin-left: 42px; border-left: 3px solid var(--teal); }
+    .lens-question {
+      position: relative;
+      margin: 24px 0 0;
+      padding-top: 19px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    .section { padding: 104px 0; border-top: 1px solid var(--line); }
+    .section-head {
+      display: grid;
+      grid-template-columns: .72fr 1.28fr;
+      gap: 50px;
+      align-items: start;
+      margin-bottom: 54px;
+    }
+    .section-head p { max-width: 720px; color: var(--muted); font-size: 1.04rem; }
+
+    .focus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .focus-card {
+      min-height: 260px;
+      padding: 27px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(251, 251, 248, .72);
+    }
+    .focus-number {
+      display: block;
+      margin-bottom: 48px;
+      color: var(--muted);
+      font: 500 .72rem/1 "IBM Plex Mono", monospace;
+    }
+    .focus-card p { color: var(--muted); font-size: .92rem; }
+    .focus-card:nth-child(1) { border-top: 4px solid var(--teal); }
+    .focus-card:nth-child(2) { border-top: 4px solid var(--blue); }
+    .focus-card:nth-child(3) { border-top: 4px solid var(--ochre); }
+
+    .work-grid { display: grid; grid-template-columns: 1.18fr .82fr; gap: 20px; }
+    .work-card {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 9px 28px rgba(20, 33, 38, .04);
+    }
+    .work-card.featured {
+      grid-row: span 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 520px;
+      background: var(--ink);
+      color: #dbe2e2;
+    }
+    .work-card.featured h3 { color: #fff; font-size: clamp(1.8rem, 3vw, 2.55rem); }
+    .work-card.featured p { max-width: 58ch; color: #b7c2c4; }
+    .work-card.featured .card-link { margin-top: auto; color: #fff; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      margin-bottom: 42px;
+      padding: 6px 10px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font: 500 .64rem/1 "IBM Plex Mono", monospace;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      opacity: .82;
+    }
+    .status::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
+    .work-meta { color: var(--blue); font: 500 .68rem/1.4 "IBM Plex Mono", monospace; letter-spacing: .07em; text-transform: uppercase; }
+    .work-card > p { color: var(--muted); font-size: .92rem; }
+    .card-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 12px;
+      color: var(--ink);
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 600;
+    }
+    .card-link:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+    .publication-list { border-top: 1px solid var(--line); }
+    .publication {
+      display: grid;
+      grid-template-columns: 75px 1fr auto;
+      gap: 24px;
+      align-items: start;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .pub-year { color: var(--muted); font: 500 .76rem/1.5 "IBM Plex Mono", monospace; }
+    .pub-title { display: block; margin-bottom: 7px; color: var(--ink); font-weight: 600; line-height: 1.45; }
+    .pub-source { color: var(--muted); font-size: .9rem; }
+    .doi {
+      display: inline-flex;
+      padding: 7px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--muted);
+      text-decoration: none;
+      font: 500 .68rem/1 "IBM Plex Mono", monospace;
+    }
+    .doi:hover { border-color: var(--blue); color: var(--blue); }
+
+    .path-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 70px; }
+    .timeline { border-left: 1px solid var(--line); }
+    .timeline-item { position: relative; padding: 0 0 42px 30px; }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-item::before {
+      position: absolute;
+      top: 5px;
+      left: -5px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 2px solid var(--teal);
+      content: "";
+    }
+    .timeline-year { color: var(--blue); font: 500 .7rem/1.4 "IBM Plex Mono", monospace; }
+    .timeline-item h3 { margin: 5px 0 4px; }
+    .timeline-item p { margin: 0; color: var(--muted); font-size: .9rem; }
+    .experience-panel {
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(251, 251, 248, .75);
+    }
+    .experience-panel h3 { font-size: 1.55rem; }
+    .role-meta { margin-bottom: 22px; color: var(--muted); font: 500 .7rem/1.5 "IBM Plex Mono", monospace; text-transform: uppercase; letter-spacing: .06em; }
+    .experience-panel p { color: var(--muted); }
+    .toolkit { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 28px; }
+    .toolkit span {
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: #294b70;
+      font-size: .76rem;
+      font-weight: 500;
+    }
+
+    .contact {
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 50px;
+      padding: clamp(38px, 7vw, 76px);
+      border-radius: 28px;
+      background: var(--teal);
+      color: #dcefeb;
+    }
+    .contact::after {
+      position: absolute;
+      right: -90px;
+      bottom: -120px;
+      width: 350px;
+      aspect-ratio: 1;
+      border: 68px solid rgba(255,255,255,.08);
+      border-radius: 50%;
+      content: "";
+    }
+    .contact h2 { max-width: 800px; color: #fff; }
+    .contact p { max-width: 650px; color: #dcefeb; }
+    .contact .button { position: relative; z-index: 1; margin-top: 16px; background: #fff; border-color: #fff; color: var(--teal); }
+    .contact-note { margin-top: 28px !important; font-size: .82rem; opacity: .8; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 0 0 36px;
+      color: var(--muted);
+      font: 400 .72rem/1.5 "IBM Plex Mono", monospace;
+    }
+
+    @media (max-width: 900px) {
+      .hero { min-height: auto; grid-template-columns: 1fr; padding-top: 68px; }
+      .research-lens { max-width: 580px; }
+      .section-head, .path-grid { grid-template-columns: 1fr; gap: 28px; }
+      .focus-grid { grid-template-columns: 1fr; }
+      .focus-card { min-height: auto; }
+      .focus-number { margin-bottom: 28px; }
+      .work-grid { grid-template-columns: 1fr; }
+      .work-card.featured { min-height: 430px; }
+      .publication { grid-template-columns: 60px 1fr; }
+      .doi { grid-column: 2; width: fit-content; }
+    }
+
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 28px, 1180px); }
+      .site-header { position: relative; }
+      .nav { align-items: flex-start; padding: 16px 0; }
+      .nav-links { display: none; }
+      .hero { padding: 56px 0 72px; }
+      h1 { font-size: clamp(3.4rem, 20vw, 5.4rem); }
+      .section { padding: 76px 0; }
+      .research-lens, .focus-card, .work-card, .experience-panel { padding: 22px; border-radius: 16px; }
+      .publication { grid-template-columns: 1fr; gap: 8px; }
+      .doi { grid-column: 1; margin-top: 5px; }
+      .contact { border-radius: 20px; }
+      footer { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { transition: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav shell" aria-label="Primary navigation">
+      <a class="brand" href="#top" aria-label="Eylül Yakar, home">
+        <span class="brand-mark" aria-hidden="true">EY</span>
+        <span>Eylül Yakar</span>
+      </a>
+      <div class="nav-links">
+        <a href="#research">Research</a>
+        <a href="#work">Selected work</a>
+        <a href="#publications">Publications</a>
+        <a href="#path">Background</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero shell" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow">Biomedical engineer · Biomaterials researcher</p>
+        <h1 id="hero-title">Eylül<br>Yakar</h1>
+        <p class="hero-lede">PhD student in Nanotechnology and Nanomedicine at Hacettepe University, working at the intersection of biomaterials, surface engineering, and regenerative medicine.</p>
+        <p class="hero-detail">My research asks how material chemistry, micro- and nanotopography, and biological context can be brought together to create more functional interfaces for implants and tissue regeneration.</p>
+        <div class="actions">
+          <a class="button" href="#work">Explore selected work <span class="arrow" aria-hidden="true">↘</span></a>
+          <a class="button secondary" href="mailto:yakareylul00@gmail.com">Email me</a>
+        </div>
+      </div>
+
+      <aside class="research-lens" aria-label="Research lens">
+        <p class="eyebrow">Research lens 01</p>
+        <h2 class="lens-title">From material surface to biological response.</h2>
+        <div class="lens-stack">
+          <div class="lens-layer">
+            <small>Material</small>
+            <strong>Surface chemistry & nanotopography</strong>
+          </div>
+          <div class="lens-layer">
+            <small>Interface</small>
+            <strong>Cell behavior & host response</strong>
+          </div>
+          <div class="lens-layer">
+            <small>Outcome</small>
+            <strong>Tissue integration & regeneration</strong>
+          </div>
+        </div>
+        <p class="lens-question">Current direction: designing biomaterial interfaces that remain biologically useful when real clinical conditions become less than ideal.</p>
+      </aside>
+    </section>
+
+    <section class="section" id="research" aria-labelledby="research-title">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Research focus</p>
+            <h2 id="research-title">Engineering the interface, not only the material.</h2>
+          </div>
+          <p>My background spans biomedical engineering, electrochemical nanostructure synthesis, antibacterial surfaces, and implant-related biomaterials. I am now extending that foundation toward soft-tissue–material interactions and regenerative interfaces.</p>
+        </div>
+
+        <div class="focus-grid">
+          <article class="focus-card">
+            <span class="focus-number">01 / 03</span>
+            <h3>Regenerative biomaterials</h3>
+            <p>Material systems for guided bone regeneration, tissue integration, and clinical environments where healing conditions can change over time.</p>
+          </article>
+          <article class="focus-card">
+            <span class="focus-number">02 / 03</span>
+            <h3>Surface & nanoengineering</h3>
+            <p>Electrochemical nanostructuring, titanium-based surfaces, and micro/nanoscale physical cues that shape material performance.</p>
+          </article>
+          <article class="focus-card">
+            <span class="focus-number">03 / 03</span>
+            <h3>Cell–material interactions</h3>
+            <p>How surface properties influence cell organization, cytocompatibility, antibacterial behavior, and host responses at biomaterial interfaces.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="work" aria-labelledby="work-title">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Selected work</p>
+            <h2 id="work-title">Questions in progress and foundations already built.</h2>
+          </div>
+          <p>The projects below connect my established experimental work with the emerging questions I am exploring for doctoral research. The PhD direction is deliberately presented as a developing research axis rather than a finalized design.</p>
+        </div>
+
+        <div class="work-grid">
+          <article class="work-card featured">
+            <span class="status">Interactive exploration</span>
+            <p class="work-meta">Doctoral direction · live browser model</p>
+            <h3>Groove versus field: guiding collective closure</h3>
+            <p>A hypothesis-generating, agent-based exploration of how biomaterial topography and an external guidance cue might influence collective cell organization and wound closure. Built to make assumptions visible, testable, and discussable.</p>
+            <a class="card-link" href="./daniel-cohen/groove-versus-field/">Open the live exploration <span aria-hidden="true">↗</span></a>
+          </article>
+
+          <article class="work-card">
+            <p class="work-meta">MSc thesis · 2023–2025</p>
+            <h3>Black titania nanotube arrays</h3>
+            <p>Electrochemical synthesis and reduction of TiO₂ nanotube arrays, followed by structural, surface, antibacterial, and cytocompatibility evaluation for implant-relevant applications.</p>
+            <a class="card-link" href="https://doi.org/10.1557/s43578-026-01904-8" target="_blank" rel="noopener">Read the publication <span aria-hidden="true">↗</span></a>
+          </article>
+
+          <article class="work-card">
+            <p class="work-meta">TÜBİTAK 1004 · 2023–2024</p>
+            <h3>Next-generation biomaterial technologies</h3>
+            <p>Nanotube synthesis on Ti-6Al-7Nb implant alloy and physical, chemical, and biological characterization focused on osseointegration potential.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="publications" aria-labelledby="publications-title">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Publications</p>
+            <h2 id="publications-title">Peer-reviewed work.</h2>
+          </div>
+          <p>Research outputs spanning electrochemically engineered titania, membrane-based water purification, and nanostructured titanium surfaces for hard-tissue repair.</p>
+        </div>
+
+        <div class="publication-list">
+          <article class="publication">
+            <span class="pub-year">2026</span>
+            <div>
+              <span class="pub-title">Electrochemical reduction as a method to engineer black titania nanotube arrays with enhanced antibacterial and cytocompatible properties</span>
+              <span class="pub-source"><strong>Yakar, E.</strong>, Kilicarslan, B., Gultekinoglu, M., & Bayram, C. · <em>Journal of Materials Research</em>, 41(12), 1848–1866</span>
+            </div>
+            <a class="doi" href="https://doi.org/10.1557/s43578-026-01904-8" target="_blank" rel="noopener">DOI ↗</a>
+          </article>
+
+          <article class="publication">
+            <span class="pub-year">2025</span>
+            <div>
+              <span class="pub-title">TiO₂ nanorod entrapped coaxially dry jet wet spun PVDF hollow fiber membranes for <em>E. coli</em> contaminated-water purification applications</span>
+              <span class="pub-source">Kilicarslan, B., <strong>Yakar, E.</strong>, & Bayram, C. · <em>Polymer Engineering & Science</em>, 65(12), 6762–6780</span>
+            </div>
+            <a class="doi" href="https://doi.org/10.1002/pen.70163" target="_blank" rel="noopener">DOI ↗</a>
+          </article>
+
+          <article class="publication">
+            <span class="pub-year">2025</span>
+            <div>
+              <span class="pub-title">Nanostructured titanium surfaces in hard tissue repair</span>
+              <span class="pub-source"><strong>Yakar, E.</strong>, Kilicarslan, B., & Bayram, C. · In <em>Nano-Biomaterials in Tissue Repair and Regeneration: Clinical Aspect for Hard Tissues Materials</em></span>
+            </div>
+            <a class="doi" href="https://doi.org/10.1007/978-981-96-1341-0_2" target="_blank" rel="noopener">DOI ↗</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="path" aria-labelledby="path-title">
+      <div class="shell">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Background</p>
+            <h2 id="path-title">An interdisciplinary path through engineering and nanomedicine.</h2>
+          </div>
+          <p>Training in biomedical engineering established the clinical problem-solving base; graduate work in nanotechnology and nanomedicine added material synthesis, characterization, and biological evaluation.</p>
+        </div>
+
+        <div class="path-grid">
+          <div class="timeline" aria-label="Education timeline">
+            <article class="timeline-item">
+              <span class="timeline-year">2025 — PRESENT</span>
+              <h3>PhD, Nanotechnology and Nanomedicine</h3>
+              <p>Hacettepe University · Ankara, Türkiye</p>
+            </article>
+            <article class="timeline-item">
+              <span class="timeline-year">2022 — 2025</span>
+              <h3>MSc, Nanotechnology and Nanomedicine</h3>
+              <p>Hacettepe University · Thesis on black titanium dioxide nanostructures</p>
+            </article>
+            <article class="timeline-item">
+              <span class="timeline-year">2018 — 2022</span>
+              <h3>BSc, Biomedical Engineering</h3>
+              <p>TOBB University of Economics and Technology · Ankara, Türkiye</p>
+            </article>
+          </div>
+
+          <article class="experience-panel">
+            <p class="eyebrow">Research experience</p>
+            <h3>Research Assistant</h3>
+            <p class="role-meta">OSTİM Technical University · July 2024–August 2026</p>
+            <p>Conducted laboratory work, mentored students in laboratory applications, developed instructional materials, and prepared academic reports and organized research data.</p>
+            <div class="toolkit" aria-label="Methods and tools">
+              <span>Electrochemical anodization</span>
+              <span>Cathodic polarization</span>
+              <span>SEM / EDX</span>
+              <span>UV–Vis</span>
+              <span>XPS</span>
+              <span>AFM</span>
+              <span>Antibacterial testing</span>
+              <span>Cytocompatibility</span>
+              <span>ImageJ</span>
+              <span>GraphPad Prism</span>
+              <span>Origin</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact" aria-labelledby="contact-title">
+      <div class="shell">
+        <div class="contact">
+          <p class="eyebrow" style="color:#dcefeb">Contact</p>
+          <h2 id="contact-title">Interested in biomaterial interfaces, regenerative medicine, or a possible collaboration?</h2>
+          <p>I welcome conversations that connect materials engineering with meaningful biological and clinical questions.</p>
+          <a class="button" href="mailto:yakareylul00@gmail.com">yakareylul00@gmail.com <span aria-hidden="true">↗</span></a>
+          <p class="contact-note">Ankara, Türkiye · Turkish (native) · English (advanced)</p>
+        </div>
+
+        <footer>
+          <span>© 2026 Eylül Yakar</span>
+          <span>Biomedical engineering · Biomaterials · Nanomedicine</span>
+        </footer>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
