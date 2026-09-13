@@ -145,29 +145,16 @@
     .button:hover { transform: translateY(-2px); box-shadow: 0 9px 25px rgba(20, 33, 38, .14); }
     .button.secondary { background: transparent; color: var(--ink); }
     .button.secondary:hover { background: var(--surface); }
-    .arrow { font-size: 1.08rem; }
 
     .research-lens {
-      position: relative;
-      overflow: hidden;
       padding: 28px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: rgba(251, 251, 248, .86);
       box-shadow: var(--shadow);
     }
-    .research-lens::before {
-      position: absolute;
-      inset: -80px -80px auto auto;
-      width: 210px;
-      aspect-ratio: 1;
-      border: 42px solid var(--teal-soft);
-      border-radius: 50%;
-      content: "";
-      opacity: .75;
-    }
-    .lens-title { position: relative; margin-bottom: 28px; font-size: 1.62rem; line-height: 1.13; }
-    .lens-stack { position: relative; display: grid; gap: 10px; }
+    .research-lens .eyebrow { margin-bottom: 20px; }
+    .lens-stack { display: grid; gap: 10px; }
     .lens-layer {
       padding: 15px 16px;
       border: 1px solid var(--line);
@@ -243,21 +230,6 @@
     .work-card.featured h3 { color: #fff; font-size: clamp(1.8rem, 3vw, 2.55rem); }
     .work-card.featured p { max-width: 58ch; color: #b7c2c4; }
     .work-card.featured .card-link { margin-top: auto; color: #fff; }
-    .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      width: fit-content;
-      margin-bottom: 42px;
-      padding: 6px 10px;
-      border: 1px solid currentColor;
-      border-radius: 999px;
-      font: 500 .64rem/1 "IBM Plex Mono", monospace;
-      letter-spacing: .07em;
-      text-transform: uppercase;
-      opacity: .82;
-    }
-    .status::before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
     .work-meta { color: var(--blue); font: 500 .68rem/1.4 "IBM Plex Mono", monospace; letter-spacing: .07em; text-transform: uppercase; }
     .work-card > p { color: var(--muted); font-size: .92rem; }
     .card-link {
@@ -333,23 +305,11 @@
     }
 
     .contact {
-      overflow: hidden;
-      position: relative;
       margin-bottom: 50px;
       padding: clamp(38px, 7vw, 76px);
       border-radius: 28px;
       background: var(--teal);
       color: #dcefeb;
-    }
-    .contact::after {
-      position: absolute;
-      right: -90px;
-      bottom: -120px;
-      width: 350px;
-      aspect-ratio: 1;
-      border: 68px solid rgba(255,255,255,.08);
-      border-radius: 50%;
-      content: "";
     }
     .contact h2 { max-width: 800px; color: #fff; }
     .contact p { max-width: 650px; color: #dcefeb; }
@@ -419,19 +379,18 @@
   <main id="top">
     <section class="hero shell" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow">Biomedical engineer · Biomaterials researcher</p>
+        <p class="eyebrow">Biomedical engineer</p>
         <h1 id="hero-title">Eylül<br>Yakar</h1>
-        <p class="hero-lede">PhD student in Nanotechnology and Nanomedicine at Hacettepe University, working at the intersection of biomaterials, surface engineering, and regenerative medicine.</p>
-        <p class="hero-detail">My research asks how material chemistry, micro- and nanotopography, and biological context can be brought together to create more functional interfaces for implants and tissue regeneration.</p>
+        <p class="hero-lede">PhD student in Nanotechnology and Nanomedicine at Hacettepe University.</p>
+        <p class="hero-detail">I work on biomaterials, surface engineering, and regenerative medicine — mainly how material surface chemistry and micro/nanoscale topography affect cell behavior and tissue integration.</p>
         <div class="actions">
-          <a class="button" href="#work">Explore selected work <span class="arrow" aria-hidden="true">↘</span></a>
+          <a class="button" href="#publications">Publications</a>
           <a class="button secondary" href="mailto:yakareylul00@gmail.com">Email me</a>
         </div>
       </div>
 
-      <aside class="research-lens" aria-label="Research lens">
-        <p class="eyebrow">Research lens 01</p>
-        <h2 class="lens-title">From material surface to biological response.</h2>
+      <aside class="research-lens" aria-label="Research interests">
+        <p class="eyebrow">Research interests</p>
         <div class="lens-stack">
           <div class="lens-layer">
             <small>Material</small>
@@ -446,7 +405,6 @@
             <strong>Tissue integration & regeneration</strong>
           </div>
         </div>
-        <p class="lens-question">Current direction: designing biomaterial interfaces that remain biologically useful when real clinical conditions become less than ideal.</p>
       </aside>
     </section>
 
@@ -455,26 +413,26 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">Research focus</p>
-            <h2 id="research-title">Engineering the interface, not only the material.</h2>
+            <h2 id="research-title">Biomaterials and cell–material interactions</h2>
           </div>
-          <p>My background spans biomedical engineering, electrochemical nanostructure synthesis, antibacterial surfaces, and implant-related biomaterials. I am now extending that foundation toward soft-tissue–material interactions and regenerative interfaces.</p>
+          <p>My background is in biomedical engineering, electrochemical nanostructure synthesis, and antibacterial, implant-related biomaterials. I am now extending this toward soft-tissue–material interactions and regenerative interfaces.</p>
         </div>
 
         <div class="focus-grid">
           <article class="focus-card">
             <span class="focus-number">01 / 03</span>
             <h3>Regenerative biomaterials</h3>
-            <p>Material systems for guided bone regeneration, tissue integration, and clinical environments where healing conditions can change over time.</p>
+            <p>Material systems for guided bone regeneration and tissue integration under variable healing conditions.</p>
           </article>
           <article class="focus-card">
             <span class="focus-number">02 / 03</span>
             <h3>Surface & nanoengineering</h3>
-            <p>Electrochemical nanostructuring, titanium-based surfaces, and micro/nanoscale physical cues that shape material performance.</p>
+            <p>Electrochemical nanostructuring of titanium-based surfaces and the effect of micro/nanoscale topography on material performance.</p>
           </article>
           <article class="focus-card">
             <span class="focus-number">03 / 03</span>
             <h3>Cell–material interactions</h3>
-            <p>How surface properties influence cell organization, cytocompatibility, antibacterial behavior, and host responses at biomaterial interfaces.</p>
+            <p>How surface properties affect cell organization, cytocompatibility, antibacterial behavior, and host response at biomaterial interfaces.</p>
           </article>
         </div>
       </div>
@@ -485,18 +443,17 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">Selected work</p>
-            <h2 id="work-title">Questions in progress and foundations already built.</h2>
+            <h2 id="work-title">Projects</h2>
           </div>
-          <p>The projects below connect my established experimental work with the emerging questions I am exploring for doctoral research. The PhD direction is deliberately presented as a developing research axis rather than a finalized design.</p>
+          <p>Completed experimental work alongside an exploratory model I am developing for my PhD research.</p>
         </div>
 
         <div class="work-grid">
           <article class="work-card featured">
-            <span class="status">Interactive exploration</span>
-            <p class="work-meta">Doctoral direction · live browser model</p>
+            <p class="work-meta">PhD project · in progress</p>
             <h3>Groove versus field: guiding collective closure</h3>
-            <p>A hypothesis-generating, agent-based exploration of how biomaterial topography and an external guidance cue might influence collective cell organization and wound closure. Built to make assumptions visible, testable, and discussable.</p>
-            <a class="card-link" href="./daniel-cohen/groove-versus-field/">Open the live exploration <span aria-hidden="true">↗</span></a>
+            <p>An agent-based model exploring how biomaterial topography and an external guidance cue might influence collective cell organization during wound closure. Built as a tool for generating and testing hypotheses.</p>
+            <a class="card-link" href="./daniel-cohen/groove-versus-field/">Open the model <span aria-hidden="true">↗</span></a>
           </article>
 
           <article class="work-card">
@@ -520,9 +477,9 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">Publications</p>
-            <h2 id="publications-title">Peer-reviewed work.</h2>
+            <h2 id="publications-title">Peer-reviewed articles</h2>
           </div>
-          <p>Research outputs spanning electrochemically engineered titania, membrane-based water purification, and nanostructured titanium surfaces for hard-tissue repair.</p>
+          <p>Work on electrochemically engineered titania, membrane-based water purification, and nanostructured titanium surfaces for hard-tissue repair.</p>
         </div>
 
         <div class="publication-list">
@@ -561,9 +518,9 @@
         <div class="section-head">
           <div>
             <p class="eyebrow">Background</p>
-            <h2 id="path-title">An interdisciplinary path through engineering and nanomedicine.</h2>
+            <h2 id="path-title">Education and training</h2>
           </div>
-          <p>Training in biomedical engineering established the clinical problem-solving base; graduate work in nanotechnology and nanomedicine added material synthesis, characterization, and biological evaluation.</p>
+          <p>Training in biomedical engineering, followed by graduate work in nanotechnology and nanomedicine covering material synthesis, characterization, and biological evaluation.</p>
         </div>
 
         <div class="path-grid">
@@ -612,9 +569,9 @@
       <div class="shell">
         <div class="contact">
           <p class="eyebrow" style="color:#dcefeb">Contact</p>
-          <h2 id="contact-title">Interested in biomaterial interfaces, regenerative medicine, or a possible collaboration?</h2>
-          <p>I welcome conversations that connect materials engineering with meaningful biological and clinical questions.</p>
-          <a class="button" href="mailto:yakareylul00@gmail.com">yakareylul00@gmail.com <span aria-hidden="true">↗</span></a>
+          <h2 id="contact-title">Get in touch</h2>
+          <p>For questions about my research or potential collaboration, feel free to email me.</p>
+          <a class="button" href="mailto:yakareylul00@gmail.com">yakareylul00@gmail.com</a>
           <p class="contact-note">Ankara, Türkiye · Turkish (native) · English (advanced)</p>
         </div>
 
