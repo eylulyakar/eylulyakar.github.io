@@ -268,6 +268,7 @@
     .doi:hover { border-color: var(--blue); color: var(--blue); }
 
     .path-grid { display: grid; grid-template-columns: .85fr 1.15fr; gap: 70px; }
+    .path-side { display: grid; gap: 20px; }
     .timeline { border-left: 1px solid var(--line); }
     .timeline-item { position: relative; padding: 0 0 42px 30px; }
     .timeline-item:last-child { padding-bottom: 0; }
@@ -460,6 +461,16 @@
             <p class="work-meta">MSc thesis · 2023–2025</p>
             <h3>Black titania nanotube arrays</h3>
             <p>Electrochemical synthesis and reduction of TiO₂ nanotube arrays, followed by structural, surface, antibacterial, and cytocompatibility evaluation for implant-relevant applications.</p>
+            <div class="toolkit" aria-label="Methods used">
+              <span>Anodic oxidation</span>
+              <span>Cathodic polarization</span>
+              <span>SEM / EDX</span>
+              <span>UV–Vis</span>
+              <span>XPS</span>
+              <span>AFM</span>
+              <span>Antibacterial testing</span>
+              <span>Cytocompatibility</span>
+            </div>
             <a class="card-link" href="https://doi.org/10.1557/s43578-026-01904-8" target="_blank" rel="noopener">Read the publication <span aria-hidden="true">↗</span></a>
           </article>
 
@@ -542,25 +553,27 @@
             </article>
           </div>
 
-          <article class="experience-panel">
-            <p class="eyebrow">Research experience</p>
-            <h3>Research Assistant</h3>
-            <p class="role-meta">OSTİM Technical University · July 2024–August 2026</p>
-            <p>Conducted laboratory work, mentored students in laboratory applications, developed instructional materials, and prepared academic reports and organized research data.</p>
-            <div class="toolkit" aria-label="Methods and tools">
-              <span>Electrochemical anodization</span>
-              <span>Cathodic polarization</span>
-              <span>SEM / EDX</span>
-              <span>UV–Vis</span>
-              <span>XPS</span>
-              <span>AFM</span>
-              <span>Antibacterial testing</span>
-              <span>Cytocompatibility</span>
-              <span>ImageJ</span>
-              <span>GraphPad Prism</span>
-              <span>Origin</span>
-            </div>
-          </article>
+          <div class="path-side">
+            <article class="experience-panel">
+              <p class="eyebrow">Research experience</p>
+              <h3>Research Assistant</h3>
+              <p class="role-meta">Ostim Technical University, Dept. of Nanotechnology Engineering · July 2024–August 2026</p>
+              <p>Carried out laboratory experiments, mentored students in laboratory applications, and developed instructional materials. Prepared academic reports and documents, and collected and organized data.</p>
+            </article>
+
+            <article class="experience-panel">
+              <p class="eyebrow">Technical skills</p>
+              <div class="toolkit" aria-label="Technical skills">
+                <span>Microsoft Office</span>
+                <span>ImageJ</span>
+                <span>GraphPad Prism</span>
+                <span>Origin</span>
+                <span>GIMP</span>
+                <span>MATLAB</span>
+                <span>C</span>
+              </div>
+            </article>
+          </div>
         </div>
       </div>
     </section>
