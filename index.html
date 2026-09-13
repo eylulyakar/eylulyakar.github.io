@@ -62,7 +62,7 @@
       font-weight: 600;
       text-wrap: balance;
     }
-    h1 { margin-bottom: 20px; font-size: clamp(3.7rem, 8vw, 7.3rem); line-height: .88; letter-spacing: -.055em; }
+    h1 { margin-bottom: 22px; font-size: clamp(2.7rem, 5.4vw, 4.7rem); line-height: 1.08; letter-spacing: -.025em; }
     h2 { margin-bottom: 18px; font-size: clamp(2rem, 4vw, 3.25rem); line-height: 1.04; letter-spacing: -.035em; }
     h3 { margin-bottom: 10px; font-size: 1.28rem; line-height: 1.22; }
     p { margin: 0 0 1em; }
@@ -110,12 +110,11 @@
     .nav-links a:hover { color: var(--ink); }
 
     .hero {
-      min-height: calc(100vh - 72px);
       display: grid;
       grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
       align-items: center;
       gap: clamp(40px, 8vw, 112px);
-      padding: 84px 0 92px;
+      padding: 76px 0 84px;
     }
     .hero-copy { max-width: 760px; }
     .hero-lede {
@@ -182,19 +181,18 @@
       font-size: .85rem;
     }
 
-    .section { padding: 104px 0; border-top: 1px solid var(--line); }
+    .section { padding: 84px 0; border-top: 1px solid var(--line); }
     .section-head {
       display: grid;
       grid-template-columns: .72fr 1.28fr;
       gap: 50px;
       align-items: start;
-      margin-bottom: 54px;
+      margin-bottom: 44px;
     }
     .section-head p { max-width: 720px; color: var(--muted); font-size: 1.04rem; }
 
     .focus-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
     .focus-card {
-      min-height: 260px;
       padding: 27px;
       border: 1px solid var(--line);
       border-radius: var(--radius);
@@ -202,7 +200,7 @@
     }
     .focus-number {
       display: block;
-      margin-bottom: 48px;
+      margin-bottom: 22px;
       color: var(--muted);
       font: 500 .72rem/1 "IBM Plex Mono", monospace;
     }
@@ -223,7 +221,6 @@
       grid-row: span 2;
       display: flex;
       flex-direction: column;
-      min-height: 520px;
       background: var(--ink);
       color: #dbe2e2;
     }
@@ -327,14 +324,12 @@
     }
 
     @media (max-width: 900px) {
-      .hero { min-height: auto; grid-template-columns: 1fr; padding-top: 68px; }
+      .hero { grid-template-columns: 1fr; padding-top: 60px; }
       .research-lens { max-width: 580px; }
       .section-head, .path-grid { grid-template-columns: 1fr; gap: 28px; }
       .focus-grid { grid-template-columns: 1fr; }
-      .focus-card { min-height: auto; }
-      .focus-number { margin-bottom: 28px; }
       .work-grid { grid-template-columns: 1fr; }
-      .work-card.featured { min-height: 430px; }
+      .work-card.featured { grid-row: auto; }
       .publication { grid-template-columns: 60px 1fr; }
       .doi { grid-column: 2; width: fit-content; }
     }
@@ -344,8 +339,8 @@
       .site-header { position: relative; }
       .nav { align-items: flex-start; padding: 16px 0; }
       .nav-links { display: none; }
-      .hero { padding: 56px 0 72px; }
-      h1 { font-size: clamp(3.4rem, 20vw, 5.4rem); }
+      .hero { padding: 48px 0 60px; }
+      h1 { font-size: clamp(2.5rem, 10vw, 3.4rem); }
       .section { padding: 76px 0; }
       .research-lens, .focus-card, .work-card, .experience-panel { padding: 22px; border-radius: 16px; }
       .publication { grid-template-columns: 1fr; gap: 8px; }
@@ -381,7 +376,7 @@
     <section class="hero shell" aria-labelledby="hero-title">
       <div class="hero-copy">
         <p class="eyebrow">Biomedical engineer</p>
-        <h1 id="hero-title">Eylül<br>Yakar</h1>
+        <h1 id="hero-title">Eylül Yakar</h1>
         <p class="hero-lede">PhD student in Nanotechnology and Nanomedicine at Hacettepe University.</p>
         <p class="hero-detail">I work on biomaterials, surface engineering, and regenerative medicine — mainly how material surface chemistry and micro/nanoscale topography affect cell behavior and tissue integration.</p>
         <div class="actions">
