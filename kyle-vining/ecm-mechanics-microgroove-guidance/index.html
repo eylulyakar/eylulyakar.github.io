@@ -1,0 +1,885 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<title>ECM State × Groove Guidance</title>
+</head>
+<body>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,400..600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#0a1c21;
+    --panel:#0f2830;
+    --panel-2:#143540;
+    --panel-3:#0d242b;
+    --line:rgba(255,255,255,0.09);
+    --line-strong:rgba(255,255,255,0.16);
+    --ink:#eef6f4;
+    --muted:#8fa8a3;
+    --muted-2:#5f7b76;
+    --groove:#5fbfc9;
+    --groove-dim:rgba(95,191,201,0.28);
+    --trigger:#e2a35f;
+    --trigger-dim:rgba(226,163,95,0.28);
+    --soft:#d17a68;
+    --stiff:#7fc08a;
+    --danger:#e0806e;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans',system-ui,sans-serif;
+    padding-inline:16px;
+    padding-block:28px 48px;
+    max-width:1400px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;text-wrap:balance;margin:0;}
+  h1{font-size:clamp(1.5rem,4vw,2.05rem);letter-spacing:-0.01em;}
+  h2{font-size:1.05rem;color:var(--ink);}
+  h3{font-size:0.95rem;font-weight:600;}
+  p{margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  a{color:var(--groove);}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.68rem;
+    letter-spacing:0.09em;
+    text-transform:uppercase;
+    color:var(--muted-2);
+    margin-bottom:10px;
+  }
+  header{margin-bottom:22px;}
+  .lede{margin-top:12px;color:var(--muted);font-size:0.95rem;max-width:660px;}
+  .flag{
+    display:inline-flex;align-items:center;gap:6px;
+    margin-top:14px;
+    padding:5px 10px;
+    border:1px solid var(--line-strong);
+    border-radius:100px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.66rem;letter-spacing:0.05em;text-transform:uppercase;
+    color:var(--trigger);background:var(--trigger-dim);
+  }
+
+  .stage{
+    display:grid;
+    grid-template-columns:232px 1fr 272px;
+    grid-template-areas:"scen sim ctl";
+    gap:16px;
+    margin-top:24px;
+  }
+  .scen-panel{grid-area:scen;}
+  .sim-panel{grid-area:sim;}
+  .controls{grid-area:ctl;}
+  @media (max-width:980px){
+    .stage{
+      grid-template-columns:1fr 272px;
+      grid-template-areas:"scen scen" "sim ctl";
+    }
+  }
+  @media (max-width:720px){
+    .stage{
+      grid-template-columns:1fr;
+      grid-template-areas:"sim" "scen" "ctl";
+    }
+  }
+
+  .panel{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+  }
+
+  .canvas-wrap{position:relative;}
+  #sim{
+    width:100%;
+    aspect-ratio:16/9;
+    display:block;
+    background:var(--panel-3);
+    border-radius:10px;
+    border:1px solid var(--line);
+  }
+  .runbar{
+    display:flex;align-items:center;gap:10px;
+    margin-top:12px;flex-wrap:wrap;
+  }
+  .clock{
+    font-family:'IBM Plex Mono',monospace;font-size:0.8rem;color:var(--muted);
+    margin-right:auto;
+  }
+  .clock b{color:var(--ink);}
+  .run-note{
+    width:100%;font-size:0.72rem;color:var(--trigger);
+    padding-top:2px;
+  }
+  button{
+    font-family:'IBM Plex Sans',sans-serif;font-size:0.82rem;font-weight:500;
+    background:var(--panel-2);color:var(--ink);
+    border:1px solid var(--line-strong);
+    border-radius:8px;padding:7px 13px;cursor:pointer;
+  }
+  button:hover{border-color:var(--groove);}
+  button.primary{background:var(--groove);color:#04181b;border-color:var(--groove);}
+  button.primary:hover{filter:brightness(1.08);}
+
+  .legend{
+    margin-top:12px;
+    display:flex;flex-wrap:wrap;gap:14px;
+    font-size:0.72rem;color:var(--muted);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none;}
+  .ln{width:14px;height:2px;display:inline-block;flex:none;}
+
+  .controls h3{margin-bottom:4px;}
+  .ctl-group{margin-bottom:20px;}
+  .ctl-group:last-child{margin-bottom:0;}
+  .ctl-sub{font-size:0.75rem;color:var(--muted);margin-top:2px;margin-bottom:10px;}
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .switch{
+    position:relative;width:38px;height:21px;border-radius:100px;
+    background:var(--panel-2);border:1px solid var(--line-strong);
+    cursor:pointer;flex:none;padding:0;
+  }
+  .switch::after{
+    content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;
+    border-radius:50%;background:var(--muted);transition:transform .15s, background .15s;
+  }
+  .switch.on{background:var(--groove-dim);border-color:var(--groove);}
+  .switch.on::after{transform:translateX(16px);background:var(--groove);}
+
+  .field-label{font-size:0.78rem;color:var(--ink);}
+  .depth-row{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;}
+  .depth-row button{flex:1;min-width:90px;padding:7px 5px;font-size:0.72rem;font-family:'IBM Plex Mono',monospace;line-height:1.3;}
+  .depth-row button.active{background:var(--groove);color:#04181b;border-color:var(--groove);}
+  .ctl-values{transition:opacity .15s;}
+  .ctl-values.inactive{opacity:0.38;pointer-events:none;}
+  .depth-row button:disabled{cursor:not-allowed;}
+
+  .stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;
+  }
+  @media (max-width:560px){ .stats{grid-template-columns:1fr;} }
+  .stat{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  }
+  .stat .label{font-size:0.68rem;letter-spacing:0.05em;text-transform:uppercase;color:var(--muted-2);font-family:'IBM Plex Mono',monospace;}
+  .stat .value{font-family:'IBM Plex Mono',monospace;font-size:1.55rem;margin-top:4px;color:var(--ink);}
+  .stat .sub{font-size:0.72rem;color:var(--muted);margin-top:3px;}
+  .stat.state-pos .value{color:var(--stiff);}
+  .stat.state-neg .value{color:var(--danger);}
+  .stat.align-pos .value{color:var(--groove);}
+  .stat.align-neg .value{color:var(--trigger);} /* perpendicular to groove axis is a direction, not a bad outcome — no alarm red */
+
+  .scen-heading{margin-bottom:10px;}
+  .scen-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  @media (max-width:980px) and (min-width:721px){
+    .scen-row{grid-template-columns:repeat(4,1fr);}
+  }
+  .scen{
+    display:block;width:100%;
+    background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:8px 10px;text-align:left;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;
+  }
+  .scen b{display:block;font-family:'IBM Plex Mono',monospace;color:var(--groove);font-size:0.72rem;margin-bottom:3px;}
+  .scen span{display:block;font-size:0.7rem;color:var(--muted);line-height:1.35;}
+  .scen:hover{border-color:var(--line-strong);}
+  .scen.active{border-color:var(--groove);background:var(--panel-2);}
+
+  .compact-section{margin-top:30px;padding-top:22px;border-top:1px solid var(--line);}
+  .section-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:14px;}
+  .section-head p{max-width:670px;color:var(--muted);font-size:0.84rem;}
+  .info-tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+  .info-tab{background:transparent;color:var(--muted);}
+  .info-tab.active{background:var(--panel-2);border-color:var(--groove);color:var(--ink);}
+  .info-panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;
+  }
+  .info-panel > p{color:var(--muted);font-size:0.85rem;max-width:900px;}
+  .decision-grid,.pilot-grid,.evidence-grid{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;
+  }
+  .mini-card{
+    background:var(--panel-3);border:1px solid var(--line);border-radius:10px;padding:13px;
+  }
+  .mini-card .kicker{
+    font-family:'IBM Plex Mono',monospace;font-size:0.65rem;letter-spacing:0.06em;
+    text-transform:uppercase;color:var(--groove);margin-bottom:6px;
+  }
+  .mini-card h3{font-size:0.9rem;margin-bottom:5px;}
+  .mini-card p,.mini-card li{font-size:0.78rem;line-height:1.5;color:var(--muted);}
+  .mini-card ul{margin:6px 0 0;padding-left:17px;}
+  .mini-card code,.formula{
+    font-family:'IBM Plex Mono',monospace;color:var(--ink);font-size:0.75rem;
+  }
+  .formula{
+    display:block;margin-top:12px;padding:10px 12px;border-radius:8px;
+    background:rgba(255,255,255,0.05);overflow-wrap:anywhere;
+  }
+  .scope-note{
+    margin-top:12px;padding:10px 12px;border-left:2px solid var(--trigger);
+    background:var(--trigger-dim);color:var(--ink);font-size:0.8rem;line-height:1.5;
+  }
+  details.refs{margin-top:12px;border-top:1px solid var(--line);padding-top:10px;}
+  details.refs summary{cursor:pointer;color:var(--muted);font-size:0.8rem;}
+  details.refs ol{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:0.75rem;line-height:1.5;}
+  details.refs li{margin-bottom:7px;}
+  [hidden]{display:none!important;}
+  @media (max-width:760px){
+    .section-head{display:block;}
+    .section-head p{margin-top:6px;}
+    .decision-grid,.pilot-grid,.evidence-grid{grid-template-columns:1fr;}
+  }
+
+  footer{margin-top:30px;font-size:0.72rem;color:var(--muted-2);}
+</style>
+
+<header>
+  <div class="eyebrow">Hypothesis-generating concept model · not calibrated</div>
+  <h1>ECM mechanical state × microgroove guidance</h1>
+  <p class="lede">
+    Does the surrounding gingival ECM state change how microgrooves organize fibroblast alignment, inward
+    migration, and matrix deposition after premature GBR membrane exposure? This model screens that interaction
+    and helps prioritize groove depths for a first wet-lab comparison; it does not predict a final membrane.
+  </p>
+  <div class="flag">Soft-tissue module · gingival fibroblasts · not calibrated</div>
+</header>
+
+<div class="stage">
+  <div class="panel scen-panel">
+    <h3 class="scen-heading">Comparison scenarios</h3>
+    <div class="scen-row" id="scenRow">
+      <button type="button" class="scen" data-scen="S1"><b>Flat · Lower-stiffness</b><span>Matched flat reference.</span></button>
+      <button type="button" class="scen" data-scen="S2"><b>Groove · Lower-stiffness</b><span>Depth selected in Panel A.</span></button>
+      <button type="button" class="scen" data-scen="S3"><b>Flat · Higher-stiffness</b><span>Matched flat reference.</span></button>
+      <button type="button" class="scen" data-scen="S4"><b>Groove · Higher-stiffness</b><span>Depth selected in Panel A.</span></button>
+    </div>
+    <p class="ctl-sub" style="margin-top:8px;margin-bottom:0;">Every condition change restarts the same seed at day 0.</p>
+  </div>
+
+  <div class="panel sim-panel">
+    <div class="canvas-wrap">
+      <canvas id="sim"></canvas>
+    </div>
+    <div class="runbar">
+      <span class="clock">day <b id="dayReadout" class="mono">0.00</b> / 14.00</span>
+      <button type="button" id="btnPlay" class="primary">Pause</button>
+      <button type="button" id="btnReset">Reset (same seed)</button>
+      <button type="button" id="btnSeed">New seed</button>
+      <span class="run-note" id="runNote" hidden>run complete at day 14.00 — Reset, New seed, or pick a scenario to run again</span>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:#cfe8e3"></i>fibroblast (margin, not yet in defect)</span>
+      <span><i class="dot" style="background:var(--stiff)"></i>fibroblast inside defect · higher-stiffness ECM</span>
+      <span><i class="dot" style="background:var(--soft)"></i>fibroblast inside defect · lower-stiffness ECM</span>
+      <span><i class="ln" style="background:var(--muted)"></i>deposited ECM (persists after cell moves on)</span>
+      <span><i class="ln" style="background:var(--groove)"></i>groove axis (when on)</span>
+    </div>
+  </div>
+
+  <div class="panel controls">
+    <div class="ctl-group">
+      <div class="toggle-row">
+        <h3>A · Groove</h3>
+        <button type="button" class="switch" id="swGroove" aria-label="Toggle groove guidance" aria-pressed="false"></button>
+      </div>
+      <p class="ctl-sub">An axis-only cue: it can align cells without directing them inward. Depth ranks starting conditions for later testing; width and pitch are not represented.</p>
+      <div class="ctl-values" id="grooveValues">
+        <div class="field-label">Depth (applies to both grooved conditions below)</div>
+        <div class="depth-row" id="depthRow">
+          <button type="button" data-depth="0.3">0.3 µm</button>
+          <button type="button" data-depth="0.8">0.8 µm</button>
+          <button type="button" data-depth="2">2 µm</button>
+          <button type="button" data-depth="5">5 µm</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ctl-group">
+      <h3>B · ECM mechanical state</h3>
+      <p class="ctl-sub">A fixed state of the surrounding gingival matrix—not the membrane's bulk stiffness and not a timed intervention.</p>
+      <div class="depth-row" id="ecmRow">
+        <button type="button" data-ecm="0">Lower-stiffness ECM</button>
+        <button type="button" data-ecm="1">Higher-stiffness ECM</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat" id="statAlign">
+    <div class="label">Nematic alignment index</div>
+    <div class="value mono">+0</div>
+    <div class="sub">order-parameter points, not %: −100 = perpendicular to groove axis · 0 = isotropic · +100 = parallel to groove axis</div>
+  </div>
+  <div class="stat" id="statMig">
+    <div class="label">Net inward migration</div>
+    <div class="value mono">+0%</div>
+    <div class="sub">mean reduction in distance to the defect band vs. settled starting position</div>
+  </div>
+  <div class="stat" id="statInfill">
+    <div class="label">ECM matrix infill</div>
+    <div class="value mono">0%</div>
+    <div class="sub">grid-sampled against deposited ECM marks only</div>
+  </div>
+</div>
+<p class="ctl-sub" style="margin-top:8px;">Compare groove with its matched flat reference—not with zero. ECM infill counts persistent deposited marks, not cells passing through the defect.</p>
+
+<section class="compact-section" aria-labelledby="interpretTitle">
+  <div class="section-head">
+    <h2 id="interpretTitle">From model to experiment</h2>
+    <p>Three short views keep the decision logic, translation path, and evidence boundary separate.</p>
+  </div>
+
+  <div class="info-tabs" role="tablist" aria-label="Model interpretation">
+    <button type="button" class="info-tab active" id="tabRead" role="tab" aria-selected="true" aria-controls="panelRead">Read the comparison</button>
+    <button type="button" class="info-tab" id="tabPilot" role="tab" aria-selected="false" aria-controls="panelPilot">Pilot pathway</button>
+    <button type="button" class="info-tab" id="tabEvidence" role="tab" aria-selected="false" aria-controls="panelEvidence">Evidence &amp; limits</button>
+  </div>
+
+  <div class="info-panel" id="panelRead" role="tabpanel" aria-labelledby="tabRead">
+    <p>At each depth, compare groove with its matched flat condition in both ECM states. The key result is whether the groove effect changes with ECM state—not which single animation scores highest.</p>
+    <span class="formula">Interaction(d) = [Groove(d) − Flat]<sub>higher ECM</sub> − [Groove(d) − Flat]<sub>lower ECM</sub></span>
+    <div class="decision-grid">
+      <article class="mini-card">
+        <div class="kicker">Robust guidance</div>
+        <h3>Similar groove effect</h3>
+        <p>A comparable effect in both ECM states suggests ECM-robust guidance, even when the interaction is near zero.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">State dependence</div>
+        <h3>Different groove effect</h3>
+        <p>A repeatable difference between ECM states supports the interaction hypothesis.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">Candidate rule</div>
+        <h3>Read all three metrics</h3>
+        <p>Prioritize depths that improve organization without sacrificing inward migration or matrix infill across matched seeds.</p>
+      </article>
+    </div>
+    <p class="scope-note"><b>Depth is a screening input, not an optimum.</b> Its strength mapping is phenomenological and rises monotonically by construction. A deep groove may therefore increase modeled alignment while still being a poor experimental candidate.</p>
+  </div>
+
+  <div class="info-panel" id="panelPilot" role="tabpanel" aria-labelledby="tabPilot" hidden>
+    <div class="pilot-grid">
+      <article class="mini-card">
+        <div class="kicker">01 · Computational screen</div>
+        <h3>Shortlist depths</h3>
+        <p>Run flat and 0.3/0.8/2/5 µm groove conditions under both ECM states across repeated matched seeds.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">02 · Wet-lab test</div>
+        <h3>Test the interaction</h3>
+        <p>Compare flat with the shortlisted groove conditions in lower- and higher-stiffness ECM while holding one exposure-mimetic condition constant. Width and pitch enter here.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">03 · Prototype translation</div>
+        <h3>Transfer what reproduces</h3>
+        <p>Move only a reproducible topographic effect onto a candidate groove-bearing membrane platform; material and fabrication route remain open.</p>
+      </article>
+    </div>
+    <p class="scope-note"><b>Collaboration fit:</b> published gingival ECM mechanobiology supplies the state axis; this project contributes the early-exposure question, the microgroove screen, and later membrane translation. This remains one fibroblast module—barrier integrity, epithelial sealing, and the bone-facing regenerative layer are outside the simulation.</p>
+  </div>
+
+  <div class="info-panel" id="panelEvidence" role="tabpanel" aria-labelledby="tabEvidence" hidden>
+    <div class="evidence-grid">
+      <article class="mini-card">
+        <div class="kicker">Published basis</div>
+        <h3>ECM state matters</h3>
+        <p>The ECM-state axis is anchored in gingival-fibroblast-specific evidence from Makkar et al. (2026) and informed by earlier work on mechanical regulation of inflammatory cell state and mechanically tunable cell-instructive matrices.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">Testable hypothesis</div>
+        <h3>Topography × ECM</h3>
+        <p>Whether ECM state modifies microgroove-driven alignment, inward migration, or matrix deposition in gingival fibroblasts remains to be tested.</p>
+      </article>
+      <article class="mini-card">
+        <div class="kicker">Model output</div>
+        <h3>Prioritization only</h3>
+        <p>The animation ranks comparisons generated by encoded rules. It is not biological evidence or a prediction of healing.</p>
+      </article>
+    </div>
+    <p class="scope-note"><b>Model boundary.</b> This is a qualitative, uncalibrated prioritization tool. Groove depth is encoded as increasing guidance, while ECM state is operationalized through orientational noise, persistence, and matrix-deposition probability; neither the groove-depth nor the ECM-state mapping is fitted to gingival-fibroblast data. Width, pitch, viscoelasticity, inflammatory signalling, bone-side biology, complete mucosal closure, and post-arrival integration are not modelled. Premature exposure is represented by a fixed linear band—not a finite, remodelling wound—and ECM state refers to the surrounding matrix, not membrane bulk stiffness.</p>
+    <p class="scope-note"><b>Decision boundary.</b> The ECM-dependence hypothesis would not be supported under the tested conditions if repeated matched-seed runs produced similar groove–flat contrasts in lower- and higher-stiffness ECM. A reproducible, non-zero groove effect of similar magnitude in both states would instead indicate ECM-robust guidance; no reproducible groove effect would leave that depth unsupported for that specific metric.</p>
+    <details class="refs">
+      <summary>Selected sources and rule provenance</summary>
+      <ol>
+        <li><b>H. Makkar, N. Tran, Y.-C. Chen, K. I. Ko, R. G. Wells &amp; K. H. Vining, <i>Advanced Materials</i> 38(15), e20717 (2026).</b> “Matrix Stiffness Governs Fibroblasts’ Regulation of Gingival Immune Homeostasis.” Direct gingival-fibroblast basis for the ECM-state axis and inflammatory-response framing. <a href="https://doi.org/10.1002/adma.202520717" target="_blank" rel="noopener">DOI: 10.1002/adma.202520717</a>.</li>
+        <li><b>K. H. Vining et al., <i>Nature Materials</i> 21, 939–950 (2022).</b> “Mechanical checkpoint regulates monocyte differentiation in fibrotic niches.” General precedent that ECM mechanics can regulate inflammation-associated cell state; this monocyte/fibrotic-bone-marrow system is not evidence for gingival fibroblasts and does not calibrate the model. <a href="https://doi.org/10.1038/s41563-022-01293-3" target="_blank" rel="noopener">DOI: 10.1038/s41563-022-01293-3</a>.</li>
+        <li><b>K. H. Vining, A. Stafford &amp; D. J. Mooney, <i>Biomaterials</i> 188, 187–197 (2019).</b> “Sequential modes of crosslinking tune viscoelasticity of cell-instructive hydrogels.” Experimental-platform precedent for controlling matrix mechanics; viscoelasticity is not represented in this simulation and would require separate control in a wet-lab testbed. <a href="https://doi.org/10.1016/j.biomaterials.2018.10.013" target="_blank" rel="noopener">DOI: 10.1016/j.biomaterials.2018.10.013</a>.</li>
+        <li><b>Clark et al., <i>Development</i> 108, 635–644 (1990)</b>: groove dimensions and contact guidance in non-gingival cell systems (<a href="https://doi.org/10.1242/dev.108.4.635" target="_blank" rel="noopener">DOI: 10.1242/dev.108.4.635</a>); <b>Lacroix et al., <i>Nature Physics</i> (2024)</b>: conceptual precedent for axis-aligned but bidirectional collective migration. Neither study validates the present gingival-fibroblast model.</li>
+        <li><b>Lo et al., <i>Biophysical Journal</i>, 2000; Ji &amp; Huang, <i>Communications Biology</i>, 2023</b>: stiffness-dependent migration and the limits of a monotonic persistence rule.</li>
+        <li><b>Abercrombie &amp; Heaysman, <i>Experimental Cell Research</i>, 1953; Stramer &amp; Mayor, <i>Nature Reviews Molecular Cell Biology</i>, 2017</b>: contact inhibition of locomotion used to motivate short-range collision behavior.</li>
+        <li><b>Baraka et al., <i>BDJ Open</i>, 2025</b>: gingival-fibroblast responses to nanotopography, used as tissue-relevant context rather than validation of the modeled groove depths.</li>
+        <li><b>Coeyman et al., <i>Current Opinion in Physiology</i>, 2022</b>: general fibrotic matrix-deposition feedback, used here as a non-gingival proxy.</li>
+      </ol>
+    </details>
+  </div>
+</section>
+
+<footer>Interactive concept model · gingival fibroblasts · early GBR membrane exposure · not a biological prediction.</footer>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- canvas & sizing ----------
+  var canvas = document.getElementById('sim');
+  var ctx = canvas.getContext('2d');
+  var W = 800, H = 450; // logical units
+  function fitCanvas(){
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.round(rect.width * dpr);
+    canvas.height = Math.round(rect.width * (H/W) * dpr);
+    ctx.setTransform(dpr * (canvas.width/dpr) / W, 0,0, dpr * (canvas.width/dpr) / W, 0,0);
+  }
+  window.addEventListener('resize', fitCanvas);
+
+  // ---------- state ----------
+  var rand = mulberry32(1234);
+  function mulberry32(a){
+    return function(){
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var seedVal = 1234;
+
+  var gapTop = H*0.42, gapBot = H*0.58;
+  var R = 4.4;                // cell radius
+  var INTER = 16;             // interaction sensing radius
+  var ADH_MAX = 13;           // adhesion outer range
+  var BASE_SPEED = 0.34;
+  var GROOVE_DEPTH = 5;       // active screening parameter — 0.3/0.8/2/5 µm, user-adjustable
+
+  var cells = [];
+  var ecm = [];                 // deposited ECM markers {x,y,ang}
+  var grooveOn = false;
+  var ecmStiff = 0;             // 0 = lower-stiffness, 1 = higher-stiffness — fixed per scenario
+  var simDay = 0, stepsPerDay = 54, DAY_MAX = 14;
+  var playing = true;
+
+  function grooveStrength(d){
+    // phenomenological, illustrative only — matches the page's own disclaimer
+    if(d <= 0.3) return 0.15;
+    if(d <= 0.8) return 0.35;
+    if(d <= 2)   return 0.60;
+    return 0.85;
+  }
+
+  function initCells(){
+    cells = []; ecm = []; simDay = 0;
+    playing = true;
+    if(typeof btnPlay !== 'undefined'){ btnPlay.textContent = 'Pause'; }
+    if(typeof runNote !== 'undefined'){ runNote.hidden = true; }
+    var perBand = 190;
+    // relax placement lightly to avoid heavy initial overlap
+    for(var i=0;i<perBand;i++){
+      cells.push(makeCell(rand()*W, rand()*(gapTop-6)));
+    }
+    for(var j=0;j<perBand;j++){
+      cells.push(makeCell(rand()*W, gapBot+6+rand()*(H-gapBot-6)));
+    }
+    for(var pass=0; pass<6; pass++) relax();
+    // spawnY is recorded AFTER relaxation so "net inward migration" measures
+    // movement from the settled starting configuration, not the raw random seed.
+    for(var k=0;k<cells.length;k++){ cells[k].spawnY = cells[k].y; }
+  }
+  function makeCell(x,y){
+    return {x:x,y:y,theta:rand()*Math.PI*2, band: y<gapTop? -1:1, spawnY:y};
+  }
+  function relax(){
+    for(var i=0;i<cells.length;i++){
+      var c = cells[i], fx=0,fy=0;
+      for(var j=0;j<cells.length;j++){
+        if(i===j) continue;
+        var o = cells[j];
+        var dx=c.x-o.x, dy=c.y-o.y, d2=dx*dx+dy*dy, minD=2*R;
+        if(d2 < minD*minD && d2>0.0001){
+          var d=Math.sqrt(d2), push=(minD-d)/minD;
+          fx += (dx/d)*push; fy += (dy/d)*push;
+        }
+      }
+      c.x += fx*1.6; c.y += fy*1.6;
+      c.y = clamp(c.y, c.band<0? 0:gapBot, c.band<0? gapTop:H);
+      c.x = clamp(c.x, 0, W);
+    }
+  }
+  function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+  function angDiff(a,b){ var d=(a-b)%(Math.PI*2); if(d>Math.PI)d-=Math.PI*2; if(d<-Math.PI)d+=Math.PI*2; return d; }
+
+  // ---------- physics step ----------
+  function step(){
+    if(simDay >= DAY_MAX){
+      playing = false;
+      btnPlay.textContent = 'Play';
+      runNote.hidden = false;
+      return;
+    }
+    simDay += 1/stepsPerDay;
+    if(simDay > DAY_MAX) simDay = DAY_MAX;
+
+    var noiseAmp = 0.55 - 0.32*ecmStiff;     // stiffer ECM -> less erratic
+    var blendPersist = 0.86 + 0.08*ecmStiff; // stiffer ECM -> more coordinated/persistent
+
+    for(var i=0;i<cells.length;i++){
+      var c = cells[i];
+      var fx=0, fy=0, alx=0, aly=0, wsum=0;
+      var densFront=0, densBack=0;
+
+      // direction "toward gap" is read from the cell's CURRENT position, not its
+      // fixed spawn band — a cell that has already crossed into the gap or past
+      // it is no longer pushed further in the same direction forever.
+      var towardGapSign, distToEdge;
+      if(c.y < gapTop){ towardGapSign = 1; distToEdge = gapTop - c.y; }
+      else if(c.y > gapBot){ towardGapSign = -1; distToEdge = c.y - gapBot; }
+      else { towardGapSign = 0; distToEdge = 0; }
+
+      for(var j=0;j<cells.length;j++){
+        if(i===j) continue;
+        var o=cells[j];
+        var dx=o.x-c.x, dy=o.y-c.y, d2=dx*dx+dy*dy;
+        if(d2 > INTER*INTER) continue;
+        var d = Math.sqrt(d2) || 0.0001;
+        var nx=dx/d, ny=dy/d;
+        if(d < 2*R){
+          var push = (2*R-d)/(2*R);
+          fx -= nx*push*1.1; fy -= ny*push*1.1;
+        } else if(d < ADH_MAX){
+          var t = (d-2*R)/(ADH_MAX-2*R);
+          var adh = Math.tanh(t*2.2)*0.22;
+          fx += nx*adh; fy += ny*adh;
+        }
+        var w = Math.exp(-d2/(INTER*INTER*0.5));
+        alx += Math.cos(o.theta)*w; aly += Math.sin(o.theta)*w; wsum += w;
+        // density split for free-edge sensing (only meaningful when towardGapSign!=0)
+        if(towardGapSign!==0){ if(dy*towardGapSign > 0) densFront += w; else densBack += w; }
+      }
+
+      var alignTheta = wsum>0 ? Math.atan2(aly,alx) : c.theta;
+
+      // free-edge bias: open space ahead (toward gap) relative to behind => polarize that way.
+      // Only applies to cells still outside the defect band, and only near the edge —
+      // a cell already inside the band gets no forced directional push.
+      var edgeBias = clamp((densBack-densFront)/(wsum+2), -1, 1);
+      var nearFront = towardGapSign!==0 && distToEdge < (H*0.30);
+      var edgeTheta = towardGapSign>0 ? Math.PI/2 : (towardGapSign<0 ? -Math.PI/2 : c.theta);
+
+      // groove bias: nematic, snaps polarity toward vertical axis — no built-in
+      // direction toward or away from the defect.
+      var grooveTheta = c.theta;
+      if(grooveOn){
+        var toUp = Math.abs(angDiff(c.theta, Math.PI/2)) < Math.abs(angDiff(c.theta,-Math.PI/2)) ? Math.PI/2 : -Math.PI/2;
+        grooveTheta = toUp;
+      }
+
+      // combine as vector sum of unit contributions
+      var vx = Math.cos(alignTheta)*0.9 + Math.cos(c.theta)*1.0;
+      var vy = Math.sin(alignTheta)*0.9 + Math.sin(c.theta)*1.0;
+      if(nearFront){
+        vx += Math.cos(edgeTheta)*(0.7+0.6*Math.max(edgeBias,0));
+        vy += Math.sin(edgeTheta)*(0.7+0.6*Math.max(edgeBias,0));
+      }
+      if(grooveOn){
+        var gs = grooveStrength(GROOVE_DEPTH);
+        vx += Math.cos(grooveTheta)*gs*1.6;
+        vy += Math.sin(grooveTheta)*gs*1.6;
+      }
+      var targetTheta = Math.atan2(vy,vx);
+      var noise = (rand()-0.5)*noiseAmp;
+      c.theta = c.theta + angDiff(targetTheta, c.theta)*(1-blendPersist)*1.4 + noise*0.5;
+
+      // contact inhibition: slow down if something is immediately ahead
+      var ahead = 0;
+      var lookX = c.x+Math.cos(c.theta)*R*2.2, lookY = c.y+Math.sin(c.theta)*R*2.2;
+      for(var k=0;k<cells.length;k++){
+        if(k===i) continue;
+        var oo=cells[k], ddx=oo.x-lookX, ddy=oo.y-lookY;
+        if(ddx*ddx+ddy*ddy < (R*1.3)*(R*1.3)){ ahead++; if(ahead>1) break; }
+      }
+      var speedFactor = ahead>0 ? 0.35 : 1.0;
+      var sp = BASE_SPEED*speedFactor;
+
+      c.x += (Math.cos(c.theta)*sp + fx*1.3);
+      c.y += (Math.sin(c.theta)*sp + fy*1.3);
+      c.x = clamp(c.x,0,W); c.y = clamp(c.y,0,H);
+
+      // ECM deposition once inside the defect band
+      if(c.y > gapTop-2 && c.y < gapBot+2){
+        var depRate = 0.006 + 0.02*ecmStiff;
+        if(rand() < depRate){
+          ecm.push({x:c.x+((rand()-0.5)*4), y:c.y+((rand()-0.5)*4), ang: c.theta});
+        }
+      }
+    }
+    if(ecm.length > 2600) ecm.splice(0, ecm.length-2600);
+  }
+
+  // ---------- metrics ----------
+  function alignmentScore(){
+    // signed 2D nematic order parameter relative to the vertical (groove) axis:
+    // A = mean(cos(2*(theta - pi/2))). 0 = isotropic/random, +100 = parallel to
+    // groove axis, -100 = perpendicular to it. Nematic (pi-periodic), so "up" and
+    // "down" vertical count identically, matching the groove's own axis-only cue.
+    if(!cells.length) return 0;
+    var sum=0;
+    for(var i=0;i<cells.length;i++){ sum += Math.cos(2*(cells[i].theta - Math.PI/2)); }
+    return sum/cells.length*100;
+  }
+  function distToDefectBand(y){
+    if(y < gapTop) return gapTop - y;
+    if(y > gapBot) return y - gapBot;
+    return 0;
+  }
+  function netInwardMigration(){
+    // reduction in distance to the defect band, relative to each cell's settled
+    // starting position. Saturates at each cell's own starting distance once it
+    // reaches the band, and falls again if a cell overshoots past the band into
+    // the opposite tissue — crossing all the way through is not counted as extra
+    // migration.
+    if(!cells.length) return 0;
+    var norm = gapTop; // symmetric margin-band depth, used as a stable normaliser
+    var sum=0;
+    for(var i=0;i<cells.length;i++){
+      var c = cells[i];
+      var startDist = distToDefectBand(c.spawnY);
+      var nowDist = distToDefectBand(c.y);
+      sum += (startDist - nowDist);
+    }
+    return (sum/cells.length)/norm*100; // signed % of margin-band depth
+  }
+  function gridSample(){
+    var cols=22, rows=6, total=cols*rows, covered=0, coverR=8.5;
+    for(var r=0;r<rows;r++){
+      var py = gapTop + (r+0.5)*(gapBot-gapTop)/rows;
+      for(var cI=0;cI<cols;cI++){
+        var px = (cI+0.5)*(W/cols);
+        var hit=false;
+        for(var e=0;e<ecm.length && !hit;e++){
+          var m=ecm[e], edx=m.x-px, edy=m.y-py;
+          if(edx*edx+edy*edy < coverR*coverR) hit=true;
+        }
+        if(hit) covered++;
+      }
+    }
+    return covered/total*100;
+  }
+  function ecmInfill(){ return gridSample(); }
+
+  // ---------- render ----------
+  function render(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#0d242b'; ctx.fillRect(0,0,W,H);
+
+    // Fixed exposure/defect analysis band. It does not contract or model closure.
+    ctx.fillStyle = 'rgba(255,255,255,0.055)';
+    ctx.fillRect(0,gapTop,W,gapBot-gapTop);
+    ctx.strokeStyle = 'rgba(207,232,227,0.34)';
+    ctx.lineWidth = 1.2; ctx.lineCap = 'butt'; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(0,gapTop); ctx.lineTo(W,gapTop);
+    ctx.moveTo(0,gapBot); ctx.lineTo(W,gapBot); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // groove axis lines
+    if(grooveOn){
+      var gs = grooveStrength(GROOVE_DEPTH);
+      ctx.strokeStyle = 'rgba(95,191,201,'+(0.10+gs*0.30)+')';
+      ctx.lineWidth = 1;
+      var spacing = 26;
+      for(var x=spacing/2; x<W; x+=spacing){
+        ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+      }
+    }
+
+    // ECM markers
+    ctx.strokeStyle = 'rgba(160,180,176,0.55)'; ctx.lineWidth = 1.4;
+    for(var e=0;e<ecm.length;e++){
+      var m = ecm[e];
+      ctx.beginPath();
+      ctx.moveTo(m.x-Math.cos(m.ang)*3, m.y-Math.sin(m.ang)*3);
+      ctx.lineTo(m.x+Math.cos(m.ang)*3, m.y+Math.sin(m.ang)*3);
+      ctx.stroke();
+    }
+
+    // cells — drawn as short oriented rods along theta, not plain dots, so the
+    // alignment stat has something to actually look at: a vertical cluster of
+    // rods reads as high alignment, a scattered/random cluster reads as low.
+    ctx.lineCap = 'round';
+    for(var i=0;i<cells.length;i++){
+      var c = cells[i];
+      var inDefect = c.y > gapTop-2 && c.y < gapBot+2;
+      var col = '#cfe8e3';
+      if(inDefect){ col = ecmStiff ? '#7fc08a' : '#d17a68'; }
+      var hx = Math.cos(c.theta)*R*1.25, hy = Math.sin(c.theta)*R*1.25;
+      ctx.strokeStyle = col;
+      ctx.lineWidth = R*1.1;
+      ctx.beginPath();
+      ctx.moveTo(c.x-hx, c.y-hy);
+      ctx.lineTo(c.x+hx, c.y+hy);
+      ctx.stroke();
+    }
+
+    // Keep the analysis region identifiable even when cells and ECM marks occupy it.
+    ctx.save();
+    var zoneLabel = 'FIXED LINEAR EXPOSURE BAND';
+    ctx.font = '600 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+    ctx.textBaseline = 'top';
+    var zoneLabelW = ctx.measureText(zoneLabel).width;
+    ctx.fillStyle = 'rgba(7,27,33,0.78)';
+    ctx.fillRect(9,gapTop+7,zoneLabelW+12,18);
+    ctx.fillStyle = 'rgba(207,232,227,0.78)';
+    ctx.fillText(zoneLabel,15,gapTop+11);
+    ctx.restore();
+  }
+
+  // ---------- UI wiring ----------
+  var dayReadout = document.getElementById('dayReadout');
+  var statAlignEl = document.getElementById('statAlign');
+  var statAlignVal = statAlignEl.querySelector('.value');
+  var statMigEl = document.getElementById('statMig');
+  var statMigVal = statMigEl.querySelector('.value');
+  var statInfillVal = document.querySelector('#statInfill .value');
+
+  function updateStats(){
+    dayReadout.textContent = simDay.toFixed(2);
+    var al = alignmentScore();
+    statAlignVal.textContent = (al>=0?'+':'') + al.toFixed(0); // index points, not a percentage
+    statAlignEl.className = 'stat ' + (al>=0 ? 'align-pos':'align-neg');
+    var mig = netInwardMigration();
+    statMigVal.textContent = (mig>=0?'+':'') + mig.toFixed(0)+'%';
+    statMigEl.className = 'stat ' + (mig>=0 ? 'state-pos':'state-neg');
+    statInfillVal.textContent = ecmInfill().toFixed(0)+'%';
+  }
+
+  var btnPlay = document.getElementById('btnPlay');
+  var runNote = document.getElementById('runNote');
+  btnPlay.addEventListener('click', function(){
+    playing = !playing;
+    btnPlay.textContent = playing? 'Pause':'Play';
+  });
+  document.getElementById('btnReset').addEventListener('click', function(){
+    rand = mulberry32(seedVal); initCells();
+  });
+  document.getElementById('btnSeed').addEventListener('click', function(){
+    seedVal = Math.floor(Math.random()*1e9); rand = mulberry32(seedVal); initCells();
+  });
+
+  // any change of condition — scenario, groove, depth, or ECM state — restarts
+  // the run at day 0 with the same seed, so a result on screen always belongs to
+  // exactly one condition, never a mix of two.
+  function resetRun(){ rand = mulberry32(seedVal); initCells(); }
+
+  var swGroove = document.getElementById('swGroove');
+  var grooveValues = document.getElementById('grooveValues');
+  var depthBtns = document.querySelectorAll('#depthRow button');
+  function setDepth(d){
+    GROOVE_DEPTH = d;
+    depthBtns.forEach(function(b){ b.classList.toggle('active', parseFloat(b.dataset.depth)===d); });
+  }
+  depthBtns.forEach(function(b){
+    b.addEventListener('click', function(){ setDepth(parseFloat(b.dataset.depth)); resetRun(); });
+  });
+  setDepth(5);
+  function syncGrooveDepthEnabled(){
+    grooveValues.classList.toggle('inactive', !grooveOn);
+    depthBtns.forEach(function(b){ b.disabled = !grooveOn; });
+  }
+  swGroove.addEventListener('click', function(){
+    grooveOn = !grooveOn; swGroove.classList.toggle('on', grooveOn);
+    swGroove.setAttribute('aria-pressed', grooveOn ? 'true' : 'false');
+    syncGrooveDepthEnabled();
+    syncScenarioBadge();
+    resetRun();
+  });
+  syncGrooveDepthEnabled();
+
+  var ecmBtns = document.querySelectorAll('#ecmRow button');
+  function setEcmStiff(v){
+    ecmStiff = v;
+    ecmBtns.forEach(function(b){ b.classList.toggle('active', parseFloat(b.dataset.ecm)===v); });
+  }
+  ecmBtns.forEach(function(b){
+    b.addEventListener('click', function(){ setEcmStiff(parseFloat(b.dataset.ecm)); syncScenarioBadge(); resetRun(); });
+  });
+  setEcmStiff(0);
+
+  var scenarios = {
+    S1:{groove:false, ecm:0},
+    S2:{groove:true,  ecm:0},
+    S3:{groove:false, ecm:1},
+    S4:{groove:true,  ecm:1}
+  };
+  var scenEls = document.querySelectorAll('.scen');
+  scenEls.forEach(function(el){
+    el.addEventListener('click', function(){
+      var s = scenarios[el.dataset.scen];
+      grooveOn = s.groove; swGroove.classList.toggle('on', grooveOn);
+      swGroove.setAttribute('aria-pressed', grooveOn ? 'true' : 'false');
+      syncGrooveDepthEnabled();
+      setEcmStiff(s.ecm);
+      resetRun();
+      syncScenarioBadge(el.dataset.scen);
+    });
+  });
+  function syncScenarioBadge(forceKey){
+    var match = forceKey || null;
+    if(!match){
+      for(var k in scenarios){
+        var s = scenarios[k];
+        if(s.groove===grooveOn && s.ecm===ecmStiff){ match=k; break; }
+      }
+    }
+    scenEls.forEach(function(el){
+      var active = el.dataset.scen===match;
+      el.classList.toggle('active', active);
+      el.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  // ---------- compact interpretation tabs ----------
+  var infoTabs = document.querySelectorAll('.info-tab');
+  var infoPanels = document.querySelectorAll('.info-panel');
+  infoTabs.forEach(function(tab){
+    tab.addEventListener('click', function(){
+      var target = tab.getAttribute('aria-controls');
+      infoTabs.forEach(function(item){
+        var selected = item===tab;
+        item.classList.toggle('active', selected);
+        item.setAttribute('aria-selected', selected ? 'true' : 'false');
+      });
+      infoPanels.forEach(function(panel){ panel.hidden = panel.id!==target; });
+    });
+  });
+
+  // ---------- loop ----------
+  function loop(){
+    if(playing){ step(); }
+    render();
+    updateStats();
+    requestAnimationFrame(loop);
+  }
+
+  fitCanvas();
+  initCells();
+  syncScenarioBadge('S1');
+  // start on S1 (flat, lower-stiffness ECM) as the neutral baseline — not the "headline" case
+  (function(){ var el=document.querySelector('.scen[data-scen="S1"]'); if(el) el.click(); })();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
